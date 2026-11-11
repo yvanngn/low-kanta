@@ -20,6 +20,10 @@
 - **Les Bobun (jaune)** : Kayane, M. LeMatou, Yohan, Gwendoline, Alexandre, Medhi, Feliz.
 - **Sans équipe** : Geoffrey.
 
+## Tenues
+- Tous les aventuriers portent des vêtements légers : t-shirt et pantalon de lin clair.
+- « G » = Geoffrey (raccourci de l'auteur) ; dans le jeu, il s'appelle toujours Geoffrey.
+
 ## Aventuriers et aventurières
 | Nom | Physique | Caractère |
 |---|---|---|
@@ -27,7 +31,7 @@
 | **M. LeMatou** | Taille moyenne, air triste | Parle lentement et doucement, très intelligent mais pas stratège |
 | **Ben** | Lunettes, taille moyenne, frêle | Joyeux, malin, faible physiquement |
 | **Yohan** | Lunettes, corpulence moyenne | Perfide et acerbe |
-| **Nathalie** | Petite brune, look rock (t-shirt noir, blouson, bottes) | Adore le hard rock, la bière et la moto, parle beaucoup |
+| **Nathalie** | Petite brune, look rock (t-shirt noir) | Adore le hard rock, la bière et la moto, parle beaucoup |
 | **Coline** | Grande, mince, yeux bleus, cheveux noirs en queue de cheval | Fait sa cheffe, manipulatrice |
 | **Kayane** | Brune aux cheveux bouclés, taille moyenne | Toujours d'accord avec Coline, très copine avec elle, très sociale et stratège |
 | **Gwendoline** | Assez petite, cheveux marron, lunettes, corpulence moyenne | Parle beaucoup et à tout le monde, très sociable, adore les potins |
