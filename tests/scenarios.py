@@ -71,6 +71,8 @@ def t_galerie(pw):
         check(nom in p.inner_text('#troupeFiche') and txt[:25] in p.inner_text('#troupeFiche'),'survol : présentation de '+nom)
     cx,cy=p.evaluate("()=>troupeCase(7)"); p.mouse.click(box['x']+(cx+12)/320*box['width'],box['y']+(cy+20)/144*box['height'])
     check(p.evaluate("()=>troupeSel")==7,'clic : présentation de l’aventurier cliqué')
+    p.evaluate("()=>{setV2(true);renderTroupe(500);setV2(false);renderTroupe(500);}")
+    check(not p.errs,'portraits de la troupe en V1 et en V2')
     p.click('#bTroupeMenu'); check(p.evaluate("()=>mode")=='menu' and not p.is_visible('#troupeFiche'),'Retour au menu')
     # Passer pendant la bande-annonce
     p.evaluate("()=>{titre();}"); p.click('#scene'); p.wait_for_timeout(200); p.wait_for_timeout(100)
