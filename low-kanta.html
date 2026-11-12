@@ -28,7 +28,25 @@ body{margin:0;background:var(--page);color:var(--ink);font-family:'Press Start 2
 body.jeu #jeuUI{display:grid}
 #verbs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .vb{font:inherit;font-size:clamp(9px,1.1vw,13px);background:var(--red);color:var(--ink);border:2px solid #000;padding:9px 6px;cursor:pointer}
-.vb:hover{background:var(--red-hi)} .vb.on{background:var(--gold);color:#2a160f}
+.vb:hover{background:var(--red-hi)}
+.vb:active,.sb:active,.mbtn:active,.it:active{transform:translateY(2px);box-shadow:inset 0 -1px 0 rgba(0,0,0,.35)}
+.vb,.sb{box-shadow:inset 0 -4px 0 rgba(0,0,0,.35),inset 0 2px 0 rgba(255,220,160,.18);text-shadow:2px 2px 0 #000}
+.vb.on{text-shadow:none}
+#inv{border:2px dashed #4a2e1a}
+.it{background:radial-gradient(circle,#7a4a34 0%,#3a2014 80%);box-shadow:inset 0 0 6px rgba(240,178,60,.35)}
+/* Curseur : croix fine, cadre qui pulse sur un objet (vert sur une sortie), icône de l'objet choisi */
+@media (hover:hover) and (pointer:fine){body.jeu #scene{cursor:none}}
+@media (hover:none),(pointer:coarse){#cur{display:none!important}}
+#cur{position:absolute;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;pointer-events:none;display:none;z-index:7}
+#cur b{position:absolute;left:11px;top:11px;width:4px;height:4px;background:#fff;box-shadow:0 0 0 1px #000,-8px 0 0 -1px #fff,8px 0 0 -1px #fff,0 -8px 0 -1px #fff,0 8px 0 -1px #fff}
+#cur i{position:absolute;width:8px;height:8px;border:3px solid #ffd84a;display:none;filter:drop-shadow(1px 1px 0 #000)}
+#cur i:nth-of-type(1){left:0;top:0;border-right:0;border-bottom:0}#cur i:nth-of-type(2){right:0;top:0;border-left:0;border-bottom:0}
+#cur i:nth-of-type(3){left:0;bottom:0;border-right:0;border-top:0}#cur i:nth-of-type(4){right:0;bottom:0;border-left:0;border-top:0}
+#cur.hot i{display:block}#cur.hot{animation:curp .55s ease-in-out infinite alternate}
+#cur.hot b{background:#ffd84a;box-shadow:0 0 0 1px #000}
+#cur.exit i{border-color:#7dff8a}#cur.exit b{background:#7dff8a}
+#cur canvas{position:absolute;left:20px;top:20px;width:22px;height:22px;image-rendering:pixelated;filter:drop-shadow(1px 1px 0 #000)}
+@keyframes curp{from{transform:scale(1)}to{transform:scale(1.4)}} .vb.on{background:var(--gold);color:#2a160f}
 #inv{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;background:#140a07;border:2px solid #000;padding:5px;min-height:56px}
 .it{width:48px;height:48px;background:#7a4a34;border:2px solid var(--gold);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
 .it canvas{width:36px;height:36px;image-rendering:pixelated} .it.sel{outline:3px solid var(--gold);background:#5c3a14}
@@ -58,7 +76,7 @@ body.jeu #jeuUI{display:grid}
 </head>
 <body>
 <div id="game">
-  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="fade"></div><div id="screen"></div></div>
+  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="fade"></div><div id="screen"></div></div>
   <div id="ui"><div id="sentence">Menu</div>
     <div id="jeuUI"><div id="verbs"></div><div id="inv"></div><button class="sb" id="bListe">Liste 0/2</button></div>
     <button class="sb" id="bSkip">Passer</button><button class="sb" id="bSound">Son : oui</button><button class="sb" id="bReplay">Menu</button></div>
@@ -228,6 +246,24 @@ const CAST=[
  {id:'amir',nom:'Amir',traits:'Rescapé de la saison d’avant. Taille et corpulence moyennes. N’aurait pas dû être là : il remplace un aventurier blessé au dernier moment.',
   s:{hw:8,hh:9,tw:12,th:15,lh:17,skin:'#d4a27a',hair:'#1e1410',hairStyle:'short',eye:'#2a1a10',bandana:'#c0392b',top:'#b8a888',topHi:'#cabb9c',print:'#8a7a5a',pants:'#c8bc9e',shoes:'#3a2a1a',mouth:'smirk',brows:'up'}}];
 
+/* vue de profil (marche) : tournée vers la droite, miroir pour la gauche ; f = étape 0..3 */
+function drawPersoProfil(s,f,o){
+  const legTop=-s.lh,torTop=legTop-s.th,headTop=torTop-1-s.hh,hw=s.hw,tw=Math.max(6,s.tw-4),sw=[-2,0,2,0][f],lw=s.tw>9?3:2,h=s.hair,hs=s.hairStyle;
+  if(hs==='long'||hs==='curlylong')P(-hw/2-1,headTop+1,4,s.hh+(s.hairLen||5)-2,shade(h,.8));
+  P(-1-sw,legTop,lw,s.lh-2,shade(s.pants,.82));P(-1-sw,-2,lw+2,2,shade(s.shoes,.85));
+  P(-1+sw,legTop,lw,s.lh-2,s.pants);P(-1+sw,-2,lw+2,2,s.shoes);
+  if(s.shorts){P(-1-sw,legTop+7,lw,s.lh-9,shade(s.skin,.9));P(-1+sw,legTop+7,lw,s.lh-9,s.skin);}
+  else{const lf=shade(s.pants,.86);for(let k=3;k<s.lh-3;k+=4)P(-1+sw,legTop+k,2,1,lf);}
+  P(-tw/2,torTop,tw,s.th,s.top);P(-tw/2,torTop,1,s.th,s.topHi);
+  const ax=-sw;P(ax-1,torTop+1,2,s.th-5,shade(s.top,.8));P(ax-1,torTop+s.th-4,2,4,s.skin);
+  P(-1,torTop-1,2,1,s.skin);P(-hw/2,headTop,hw,s.hh,s.skin);P(hw/2,headTop+Math.floor(s.hh/2)+1,1,1,s.skin);
+  P(-hw/2-1,headTop-2,hw+1,3,h);P(-hw/2-1,headTop,3,hs==='short'?4:s.hh+2,h);
+  if(hs==='ponytail'){P(-hw/2-3,headTop,2,7,h);}if(hs==='afro'){P(-hw/2-3,headTop-5,hw+4,6,h);P(-hw/2-3,headTop,3,6,h);}
+  if(s.bandana)P(-hw/2-1,headTop+1,hw+1,2,s.bandana);
+  const ey=headTop+Math.floor(s.hh/2);P(hw/2-2,ey,1,1,s.eye||'#1a1210');
+  if(s.glasses){P(hw/2-3,ey-1,3,1,'#0d0d0d');P(hw/2-3,ey+1,3,1,'#0d0d0d');P(-1,ey-1,hw/2-2,1,'#0d0d0d');}
+  P(hw/2-2,ey+3,2,1,o&&o.talk?'#7a2e2a':(s.lips?'#c03848':'#9a4a40'));
+}
 function drawPerso(s,o){
   o=o||{};const legTop=-s.lh,torTop=legTop-s.th,headTop=torTop-1-s.hh,hw=s.hw,tw=s.tw,hl=-hw/2,tl=-tw/2,lw=tw/2-1,aw=s.thin?1:2;
   if(s.hairStyle==='long')P(hl-1,headTop+1,hw+2,s.hh+s.hairLen-2,shade(s.hair,.8));
@@ -312,10 +348,14 @@ function voix(who){if(!who||who==='browny')return{nom:'Browny Grognard',s:SPECS.
 function portrait(v){const c=document.createElement('canvas');c.width=20;c.height=20;c.className='por';const g=c.getContext('2d'),old=ctx,s=v.s;ctx=g;g.save();g.translate(10,4+s.lh+s.th+1+s.hh+4);v.d(s,{});g.restore();ctx=old;return c;}
 let qui='browny';
 function say(text,ges,who){qui=who||'browny';const v=voix(who);return new Promise(res=>{bubble.innerHTML='';bubble.style.color=v.c;bubble.appendChild(portrait(v));const sp=document.createElement('span');
-  sp.innerHTML='<b class="nom">'+v.nom+'</b>';sp.appendChild(document.createTextNode(text));bubble.appendChild(sp);bubble.style.display='flex';
+  sp.innerHTML='<b class="nom">'+v.nom+'</b>';const tn=document.createTextNode('');sp.appendChild(tn);bubble.appendChild(sp);bubble.style.display='flex';
   if(mode==='galerie'||mode==='c1'){bubble.style.top='auto';bubble.style.bottom='3%';}else{bubble.style.top='4%';bubble.style.bottom='auto';}
-  talking=true;gesture=ges||0;const d=Math.max(2200,text.length*65+1200);cur={res,timer:setTimeout(fin,d)};});}
-function fin(){if(!cur)return;clearTimeout(cur.timer);bubble.style.display='none';talking=false;gesture=0;const r=cur.res;cur=null;r();}
+  talking=true;gesture=ges||0;const d=Math.max(2200,text.length*65+1200);cur={res,timer:setTimeout(fin,d),typing:true,tn,text,i:0};
+  const c=cur;c.iv=setInterval(()=>{if(cur!==c||!c.typing){clearInterval(c.iv);return;}c.i+=1;tn.data=text.slice(0,c.i);if(c.i>=text.length)finirTexte();},28);});}
+/* un clic pendant que le texte s'écrit le termine ; le clic suivant passe à la suite */
+function finirTexte(){if(!cur||!cur.typing)return false;cur.typing=false;clearInterval(cur.iv);cur.tn.data=cur.text;return true;}
+function cliquerTexte(){if(!finirTexte())fin();}
+function fin(){if(!cur)return;clearTimeout(cur.timer);clearInterval(cur.iv);bubble.style.display='none';talking=false;gesture=0;const r=cur.res;cur=null;r();}
 
 const LIGNES=[
  ["Bonsoir… et bienvenue.",0],
@@ -530,18 +570,26 @@ const ROOMS={
     {id:'retour_bois',nom:'retour au bois',r:[126,132,68,12],w:[160,140],sortie:'bois',examiner:"Le chemin qui ramène au bois."}]}};
 const ENTREES={plage:{depuis:{bois:[302,92]},defaut:[300,108]},bois:{depuis:{plage:[160,136],source:[240,106]},defaut:[160,136]},source:{depuis:{bois:[160,136]},defaut:[160,136]}};
 function spotsVisibles(){return ROOMS[G.room].spots.filter(s=>!s.vis||s.vis());}
-let camX=0;
+let camX=0,vueHeros='face';heros.dir=1;
+/* ombre portée et calque d'ambiance (lumière chaude, vignettage), comme Day in the Life */
+function ombre(x,y,w){ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(x|0,(y|0)+1,w,2.5,0,0,7);ctx.fill();}
+let _amb=null;
+function ambiance(){if(!_amb){const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  let l=g.createLinearGradient(0,0,0,H);l.addColorStop(0,'rgba(255,200,120,.10)');l.addColorStop(.6,'rgba(255,170,90,0)');l.addColorStop(1,'rgba(40,10,30,.18)');g.fillStyle=l;g.fillRect(0,0,W,H);
+  const v=g.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,W*.62);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(10,4,0,.5)');g.fillStyle=v;g.fillRect(0,0,W,H);
+  g.fillStyle='rgba(0,0,0,.05)';for(let y=0;y<H;y+=2)g.fillRect(0,y,W,1);_amb=c;}ctx.drawImage(_amb,0,0);}
 const largeur=()=>ROOMS[G.room].w||W;
 const camCible=()=>Math.max(0,Math.min(largeur()-W,heros.x-W/2));
 function spotA(x,y){x+=Math.round(camX);const l=spotsVisibles();for(let i=l.length-1;i>=0;i--){const r=l[i].r;if(x>=r[0]&&x<r[0]+r[2]&&y>=r[1]&&y<r[1]+r[3])return l[i];}return null;}
 function renderJeu(t){
   if(heros.marche){const dx=heros.tx-heros.x,dy=heros.ty-heros.y,d=Math.hypot(dx,dy);if(d<1.3){heros.x=heros.tx;heros.y=heros.ty;heros.marche=false;const a=heros.arrive;heros.arrive=null;a&&a();}
-    else{heros.x+=dx/d*1.3;heros.y+=dy/d*1.3;}}
+    else{heros.x+=dx/d*1.3;heros.y+=dy/d*1.3;if(Math.abs(dx)>.5)heros.dir=dx<0?-1:1;}}
   camX+=(camCible()-camX)*.12;const cx=Math.round(camX);
   ctx.save();ctx.translate(-cx,0);ROOMS[G.room].draw(t);
-  ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(heros.x-6,heros.y-1,12,2);
-  ctx.save();ctx.translate(Math.round(heros.x),Math.round(heros.y-(heros.marche?((t/120|0)%2):0)));drawPerso(aG(),{talk:talking&&((t/140|0)%2)});ctx.restore();
-  ctx.restore();
+  ombre(heros.x,heros.y,7);
+  ctx.save();ctx.translate(Math.round(heros.x),Math.round(heros.y));const tk=talking&&((t/140|0)%2);
+  if(heros.marche){vueHeros='profil';if(heros.dir<0)ctx.scale(-1,1);drawPersoProfil(aG(),(t/130|0)%4,{talk:tk});}else{vueHeros='face';drawPerso(aG(),{talk:tk});}
+  ctx.restore();ctx.restore();ambiance();
 }
 function allerA(x,y){const r=ROOMS[G.room].y;y=Math.max(r[0],Math.min(r[1],y));x=Math.max(10,Math.min(largeur()-10,x));
   return new Promise(res=>{heros.tx=x;heros.ty=y;heros.marche=true;heros.arrive=res;});}
@@ -552,7 +600,7 @@ async function agir(v,s){const h=s[v];
   if(v==='donner')return dit(sel?DEF.donner:DEF.donnerSansObjet);
   if(v==='utiliser'&&sel){const w=s.with&&s.with[sel];if(w)return typeof w==='function'?w():dit(w);}
   return dit(DEF[v]);}
-async function clicJeu(x,y){if(occupe)return;if(cur){fin();return;}
+async function clicJeu(x,y){if(cur){cliquerTexte();return;}if(occupe)return;
   const s=spotA(x,y);occupe=true;
   try{
     if(!s||(!verbe&&!s.sortie)){await allerA(x+Math.round(camX),y);}
@@ -585,17 +633,22 @@ function demarrerJeu(){tok++;fin();cap('');mode='jeu';G={room:'plage',inv:[],f:{
   heros.x=heros.tx=300;heros.y=heros.ty=108;heros.marche=false;camX=camCible();$('screen').style.display='none';$('screen').style.background='';
   document.body.classList.add('jeu');$('fade').style.opacity=0;majUI();
   occupe=true;dit("Me voilà tout seul sur mon île. Il va falloir trouver du bois pour me chauffer… et de l’eau.").then(()=>{occupe=false;});}
+let curItem=null;
+function majCurseur(e,h){const ce=$('cur'),b=$('scene').getBoundingClientRect();ce.style.display='block';ce.style.left=(e.clientX-b.left)+'px';ce.style.top=(e.clientY-b.top)+'px';
+  ce.classList.toggle('hot',!!h);ce.classList.toggle('exit',!!(h&&h.sortie&&!verbe&&!sel));
+  if(sel!==curItem){curItem=sel;const c=ce.querySelector('canvas');if(c)c.remove();if(sel)ce.appendChild(icone(sel));}}
 function initJeuUI(){const v=$('verbs');VERBES.forEach(([id,l])=>{const b=document.createElement('button');b.className='vb';b.dataset.v=id;b.textContent=l;
     b.onclick=()=>{verbe=verbe===id?null:id;sel=null;majUI();};v.appendChild(b);});
   $('bListe').onclick=montrerListe;
-  $('cv').addEventListener('mousemove',e=>{if(mode!=='jeu')return;const r=$('cv').getBoundingClientRect();$('sentence').textContent=phrase(spotA((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H));});}
+  $('cv').addEventListener('mouseleave',()=>{$('cur').style.display='none';});
+  $('cv').addEventListener('mousemove',e=>{if(mode!=='jeu'){$('cur').style.display='none';return;}const r=$('cv').getBoundingClientRect();majCurseur(e,spotA((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H));$('sentence').textContent=phrase(spotA((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H));});}
 initJeuUI();
 let started=false;
 $('scene').onclick=e=>{initAudio();if(mode==='menu')return;if(mode==='jeu'){if($('screen').style.display==='flex'){$('screen').style.display='none';$('screen').style.background='';return;}const r=$('cv').getBoundingClientRect();clicJeu((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H);return;}
   if(mode==='finC1'){demarrerJeu();return;}
   if(!started){started=true;$('sentence').textContent='Clique pour passer une réplique';intro();}
   else if(mode==='fin'){c1();}
-  else if(mode==='titre'){$('sentence').textContent='Clique pour passer une réplique';galerie();}else if(mode==='c1'&&vg.type==='planche')rapide=true;else fin();};
+  else if(mode==='titre'){$('sentence').textContent='Clique pour passer une réplique';galerie();}else if(mode==='c1'&&vg.type==='planche')rapide=true;else cliquerTexte();};
 $('bSkip').onclick=()=>{initAudio();started=true;if(mode==='jeu'){fin();return;}tok++;fin();if(mode==='finC1')demarrerJeu();else if(mode==='c1'||mode==='finC1')finC1();else if(mode==='galerie'||mode==='titre')finGalerie();else titre();};
 $('bReplay').onclick=()=>{initAudio();menu();};
 /* ---------- menu et mots de passe (numéro du chapitre, comme Noël au Vietnam) ---------- */
