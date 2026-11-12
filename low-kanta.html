@@ -76,10 +76,15 @@ body.jeu #jeuUI{display:grid}
 #bGo{position:absolute;right:3%;top:62%;z-index:8;display:none;min-width:0;animation:pulse 1.4s ease-in-out infinite}
 #bande{position:absolute;left:42%;right:4%;top:28%;display:none;pointer-events:none;text-align:left;z-index:6}
 #bande b{display:block;font-family:'Rubik Dirt','Lilita One',sans-serif;font-weight:normal;font-size:clamp(28px,7vw,84px);line-height:1;color:#ffd84a;-webkit-text-stroke:2px #1a0a04;filter:drop-shadow(4px 4px 0 #000);transform:rotate(-3deg)}
-#bande span{display:inline-block;margin-top:.6em;font-family:'Crete Round',Georgia,serif;font-size:clamp(12px,2vw,24px);background:#fff6c8;color:#1a1a1a;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:.25em .5em}
+#bande span{display:inline-block;margin-top:.6em;font-family:'Crete Round',Georgia,serif;font-size:clamp(10px,1.7vw,21px);line-height:1.35;background:#fff6c8;color:#1a1a1a;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:.25em .5em}
 #bande.in b{animation:bandeb .3s cubic-bezier(.2,1.6,.4,1)} #bande.in span{animation:bandeb .3s .12s cubic-bezier(.2,1.6,.4,1) backwards}
 @keyframes bandeb{from{transform:translateX(60px) rotate(-3deg) scale(1.4);opacity:0}}
 #bPasseBande{position:absolute;right:3%;top:6%;z-index:8;display:none;margin:0;font-size:clamp(9px,1.3vw,15px);padding:.5em .8em} body.bande #bPasseBande{display:block}
+#troupeFiche{position:absolute;left:53%;right:3%;top:5%;bottom:22%;display:none;overflow:auto;background:linear-gradient(#2b1d12,#1a120c);border:3px solid var(--gold);box-shadow:0 0 0 3px #000,5px 5px 0 #000;padding:.7em .9em;text-align:left;z-index:6}
+#troupeFiche b{display:block;font-family:'Rubik Dirt','Lilita One',sans-serif;font-weight:normal;color:#ffd84a;font-size:clamp(18px,3.6vw,42px);line-height:1;-webkit-text-stroke:1px #1a0a04}
+#troupeFiche i{display:block;font-style:normal;color:var(--jade);font-size:clamp(10px,1.3vw,15px);margin:.35em 0 .5em}
+#troupeFiche span{display:block;font-family:'Crete Round',Georgia,serif;font-size:clamp(11px,1.6vw,19px);line-height:1.4}
+#bTroupeMenu{position:absolute;right:3%;bottom:4%;z-index:8;display:none;min-width:0;font-size:clamp(10px,1.4vw,16px);padding:.5em 1em} body.troupe #bTroupeMenu{display:block}
 #bAide{display:none} body.v2.jeu #bAide{display:inline-block}
 body.v2 #verbs{display:none} body.v2 #jeuUI{grid-template-columns:1fr auto auto}
 @media (max-width:680px){body.v2 #jeuUI{grid-template-columns:1fr auto auto}body.v2 #inv{grid-column:auto;order:0}}
@@ -116,7 +121,7 @@ body.v2 #bubble::after{content:"▼";position:absolute;right:.8em;bottom:.45em;c
 </head>
 <body>
 <div id="game">
-  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><div id="bande"></div><button class="sb" id="bPasseBande">Passer le générique ⏭</button><button class="mbtn" id="bGo">C’est parti !</button><div id="screen"></div></div>
+  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><div id="bande"></div><div id="troupeFiche"></div><button class="mbtn" id="bTroupeMenu">Retour au menu</button><button class="sb" id="bPasseBande">Passer le générique ⏭</button><button class="mbtn" id="bGo">C’est parti !</button><div id="screen"></div></div>
   <div id="ui"><div id="sentence">Menu</div>
     <div id="jeuUI"><div id="verbs"></div><div id="inv"></div><button class="sb" id="bListe">Liste 0/2</button><button class="sb" id="bAide" title="Revoir le tuto">?</button></div>
     <button class="sb" id="bSkip">Passer</button><button class="sb" id="bSound">Son : oui</button><button class="sb" id="bReplay">Menu</button></div>
@@ -251,7 +256,7 @@ function render(t){
 }
 let talking=false,gesture=0;
 let mode='intro',galI=-1;
-function loop(t){if(mode==='jeu')renderJeu(t);else if(mode==='c1'||mode==='finC1')renderC1(t);else if(mode==='galerie')renderGalerie(t);else if(mode==='bande')renderBande(t);else render(t);requestAnimationFrame(loop);} requestAnimationFrame(loop);
+function loop(t){if(mode==='jeu')renderJeu(t);else if(mode==='c1'||mode==='finC1')renderC1(t);else if(mode==='galerie')renderGalerie(t);else if(mode==='bande')renderBande(t);else if(mode==='troupe')renderTroupe(t);else render(t);requestAnimationFrame(loop);} requestAnimationFrame(loop);
 
 /* ---------- les aventuriers et aventurières (voir PERSONNAGES.md) ---------- */
 const CAST=[
@@ -455,15 +460,29 @@ async function clicGalerie(x,y){const i=CAST.findIndex((c,j)=>x>=17+j*19&&x<35+j
 /* bande-annonce : chaque aventurier 1,5 s, nom et métier en gros, façon générique télé */
 let bandeI=0,bandeT0=0,bandeNext=null;const BANDE_COL=['#c0392b','#e0a820','#2a8ab0','#4f7a3a','#8a3a8a'];
 async function bandeAnnonce(){const k=++tok;document.body.classList.add('bande');$('screen').style.display='none';bubble.style.display='none';mode='bande';galI=-1;
-  $('sentence').textContent='Clique pour accélérer · « Les aventuriers » au menu pour tout savoir';
+  $('sentence').textContent='Clique pour l’aventurier suivant';
   for(let i=0;i<CAST.length;i++){if(k!==tok)return;bandeI=i;bandeT0=performance.now();sfx();
-    const d=$('bande'),c=CAST[i];d.innerHTML='<b>'+c.nom+'</b><span>'+(METIER[c.id]||'')+'</span>';d.style.display='block';d.classList.remove('in');void d.offsetWidth;d.classList.add('in');
-    await new Promise(r=>{const tm=setTimeout(r,1500);bandeNext=()=>{clearTimeout(tm);r();};});bandeNext=null;}
+    const d=$('bande'),c=CAST[i];d.innerHTML='<b>'+c.nom+'</b><span>'+PRESENTE[c.id]+'</span>';d.style.display='block';d.classList.remove('in');void d.offsetWidth;d.classList.add('in');
+    await new Promise(r=>{const tm=setTimeout(r,Math.max(3200,PRESENTE[c.id].length*55));bandeNext=()=>{clearTimeout(tm);r();};});bandeNext=null;}
   if(k===tok){$('bande').style.display='none';finGalerie();}}
 function renderBande(t){bandeau(BANDE_COL[bandeI%BANDE_COL.length]);const c=CAST[bandeI],dt=Math.min(1,(t-bandeT0)/220),x=Math.round(-40+120*(1-Math.pow(1-dt,3)));
   ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(x,130,16,3,0,0,7);ctx.fill();
   ctx.save();ctx.translate(x,130);ctx.scale(2,2);drawPerso(c.s,{});ctx.restore();
   if(t-bandeT0<90){ctx.globalAlpha=.7;P(0,0,W,H,'#fff');ctx.globalAlpha=1;}cadreBD();}
+/* « Les aventuriers » (menu) : les 15 d'un coup ; survol ou clic = leur présentation */
+let troupeSel=0;const TC=[5,32,46,6,4];// colonnes, largeur et hauteur de case, x0, y0
+const troupeCase=i=>[TC[3]+(i%TC[0])*TC[1],TC[4]+Math.floor(i/TC[0])*TC[2]];
+function troupe(){tok++;fin();mode='troupe';troupeSel=0;$('screen').style.display='none';$('fade').style.opacity=0;document.body.classList.add('troupe');
+  $('sentence').textContent='Survole ou clique sur un aventurier pour le découvrir';montrerTroupe(0);}
+function montrerTroupe(i){if(i<0)return;troupeSel=i;const c=CAST[i],d=$('troupeFiche');d.innerHTML='<b>'+c.nom+'</b><i>'+(METIER[c.id]||'')+'</i><span>'+PRESENTE[c.id]+'</span>';d.style.display='block';}
+function troupeA(x,y){for(let i=0;i<CAST.length;i++){const[cx,cy]=troupeCase(i);if(x>=cx&&x<cx+TC[1]-2&&y>=cy&&y<cy+TC[2]-2)return i;}return -1;}
+function finTroupe(){document.body.classList.remove('troupe');$('troupeFiche').style.display='none';}
+function renderTroupe(t){if(V2)cache('galerie',W,H,galFond2);else{vgrad(0,H,'#0e0a07','#1d130b');for(let x=0;x<W;x+=22)P(x,0,1,H,'#0a0705');}
+  ctx.globalAlpha=.35;P(0,0,W,H,'#000');ctx.globalAlpha=1;
+  CAST.forEach((c,i)=>{const[cx,cy]=troupeCase(i),w=TC[1]-2,h=TC[2]-2,on=i===troupeSel,e=equipeDe(c.id);
+    P(cx-1,cy-1,w+2,h+2,on?'#ffd84a':'#120804');P(cx,cy,w,h,on?'#2e5238':'#1c3326');if(e)P(cx,cy,w,2,e.col);
+    ctx.save();ctx.beginPath();ctx.rect(cx,cy,w,h-7);ctx.clip();ctx.translate(cx+w/2,cy+8+2*(c.s.lh+c.s.th+1+c.s.hh)+(on?Math.round(Math.sin(t/150)):0));ctx.scale(2,2);drawPerso(c.s,{talk:on&&((t/200|0)%2)});ctx.restore();
+    P(cx,cy+h-7,w,7,on?'#ffd84a':'#fff6c8');const nm=c.nom.replace('M. ','').toUpperCase().slice(0,7);drawText(nm,Math.round(cx+w/2-nm.length*2),cy+h-6,'#1a1a1a');});}
 function showCard(c){const d=$('card');d.innerHTML='<b>'+c.nom+'</b><span>'+(METIER[c.id]||'')+'</span>';d.style.display='block';}
 function finGalerie(){document.body.classList.remove('bande');$('bande').style.display='none';bandeNext=null;galLibre=false;$('bGo').style.display='none';$('card').style.display='none';bubble.style.display='none';mode='fin';const s=$('screen');s.style.display='flex';
   s.innerHTML='<p class="small">Chapitre 1</p><p class="big" style="font-size:clamp(14px,3.4vw,36px)">Tirage au sort<br>et manque de bol</p><p class="small">Mot de passe : 1</p><p class="small hint">Clique pour continuer</p>';$('sentence').textContent='Clique pour lancer le chapitre 1';}
@@ -711,10 +730,13 @@ $('scene').onclick=e=>{initAudio();if(mode==='menu')return;if(mode==='jeu'){if($
   if(!started){started=true;$('sentence').textContent='Clique pour passer une réplique';intro();}
   else if(mode==='fin'){c1();}
   else if(mode==='bande'){if(bandeNext)bandeNext();}
+  else if(mode==='troupe'){const r=$('cv').getBoundingClientRect();montrerTroupe(troupeA((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H));}
   else if(mode==='galerie'&&galLibre&&!cur){const r=$('cv').getBoundingClientRect();clicGalerie((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H);}
   else if(mode==='titre'){$('sentence').textContent='Clique pour passer une réplique';bandeAnnonce();}else if(mode==='c1'&&vg.type==='planche')rapide=true;else cliquerTexte();};
 $('bSkip').onclick=()=>{initAudio();started=true;if(mode==='jeu'){fin();return;}tok++;fin();if(mode==='finC1')demarrerJeu();else if(mode==='c1'||mode==='finC1')finC1();else if(mode==='galerie'||mode==='titre'||mode==='bande')finGalerie();else titre();};
 $('bPasseBande').onclick=e=>{e.stopPropagation();tok++;finGalerie();};
+$('bTroupeMenu').onclick=e=>{e.stopPropagation();menu();};
+$('cv').addEventListener('mousemove',e=>{if(mode!=='troupe')return;const r=$('cv').getBoundingClientRect();montrerTroupe(troupeA((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H));});
 $('bGo').onclick=e=>{e.stopPropagation();if(galFin)galFin();};
 $('bReplay').onclick=()=>{initAudio();menu();};
 /* =========================================================
@@ -979,13 +1001,13 @@ $('bAide').onclick=e=>{e.stopPropagation();if(mode==='jeu'&&!occupe)tuto(null);}
 /* ---------- menu et mots de passe (numéro du chapitre, comme Noël au Vietnam) ---------- */
 const MDP={'0':()=>{resetIntro();intro();},'1':()=>{c1();}};
 function lancer(fn){initAudio();started=true;tok++;fin();document.body.classList.remove('jeu');cap('');$('card').style.display='none';$('sentence').textContent='Clique pour passer une réplique';$('fade').style.opacity=0;fn();}
-function menu(){tok++;fin();fermerRoue();$('tuto').style.display='none';cap('');document.body.classList.remove('jeu');$('card').style.display='none';resetIntro();mode='menu';started=true;
+function menu(){tok++;fin();finTroupe();fermerRoue();$('tuto').style.display='none';cap('');document.body.classList.remove('jeu');$('card').style.display='none';resetIntro();mode='menu';started=true;
   const s=$('screen');s.style.display='flex';s.style.background='radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.7))';
   s.innerHTML='<h1 class="logo">LOW<span>KANTA</span></h1><p class="tagline">L’AVENTURE (À PEU PRÈS) EXTRÊME</p>'+
    '<button class="mbtn" id="mNew">Nouvelle partie</button>'+'<button class="mbtn" id="mCast">Les aventuriers</button>'+'<button class="mbtn" id="mV2">'+libV2()+'</button>'+
    '<div class="pw"><label class="small" for="mPw">Mot de passe</label><input id="mPw" maxlength="12" autocomplete="off"><button id="mOk">OK</button></div><p class="msg" id="mMsg"></p>';
   $('sentence').textContent='Menu';$('fade').style.opacity=.2;
-  $('mCast').onclick=e=>{e.stopPropagation();s.style.background='';lancer(()=>galerie(true));};$('mV2').onclick=e=>{e.stopPropagation();setV2(!V2);$('mV2').textContent=libV2();};$('mNew').onclick=e=>{e.stopPropagation();s.style.background='';lancer(MDP['0']);};
+  $('mCast').onclick=e=>{e.stopPropagation();s.style.background='';initAudio();troupe();};$('mV2').onclick=e=>{e.stopPropagation();setV2(!V2);$('mV2').textContent=libV2();};$('mNew').onclick=e=>{e.stopPropagation();s.style.background='';lancer(MDP['0']);};
   const ok=e=>{e&&e.stopPropagation();const v=$('mPw').value.trim().toUpperCase(),f=MDP[v];if(!f){$('mMsg').textContent='Mot de passe inconnu.';return;}s.style.background='';lancer(f);};
   $('mOk').onclick=ok;$('mPw').onkeydown=e=>{if(e.key==='Enter')ok(e);};$('mPw').onclick=e=>e.stopPropagation();}
 menu();
