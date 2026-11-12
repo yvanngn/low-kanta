@@ -73,6 +73,7 @@ body.jeu #jeuUI{display:grid}
 .hint{animation:pulse 1.4s ease-in-out infinite}@keyframes pulse{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.hint{animation:none}}
 /* ---------- V2 : roue d'actions, tuto, dialogues en bas ---------- */
+#bGo{position:absolute;right:3%;top:62%;z-index:8;display:none;min-width:0;animation:pulse 1.4s ease-in-out infinite}
 #bAide{display:none} body.v2.jeu #bAide{display:inline-block}
 body.v2 #verbs{display:none} body.v2 #jeuUI{grid-template-columns:1fr auto auto}
 @media (max-width:680px){body.v2 #jeuUI{grid-template-columns:1fr auto auto}body.v2 #inv{grid-column:auto;order:0}}
@@ -109,7 +110,7 @@ body.v2 #bubble::after{content:"▼";position:absolute;right:.8em;bottom:.45em;c
 </head>
 <body>
 <div id="game">
-  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><div id="screen"></div></div>
+  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><button class="mbtn" id="bGo">C’est parti !</button><div id="screen"></div></div>
   <div id="ui"><div id="sentence">Menu</div>
     <div id="jeuUI"><div id="verbs"></div><div id="inv"></div><button class="sb" id="bListe">Liste 0/2</button><button class="sb" id="bAide" title="Revoir le tuto">?</button></div>
     <button class="sb" id="bSkip">Passer</button><button class="sb" id="bSound">Son : oui</button><button class="sb" id="bReplay">Menu</button></div>
@@ -345,7 +346,7 @@ function renderGalerie(t){
   // cadres des 7 portraits en petit, en haut
   CAST.forEach((c,i)=>{const fx=18+i*19,fy=5;P(fx-1,fy-1,18,24,i===galI?'#f0b23c':'#5a3a1a');P(fx,fy,16,22,'#1a2a1e');
     ctx.save();ctx.beginPath();ctx.rect(fx,fy,16,22);ctx.clip();ctx.translate(fx+8,fy+7+c.s.lh+c.s.th+c.s.hh+1);
-    if(i>galI){ctx.globalAlpha=.25;}drawPerso(Object.assign({},c.s,i>galI?{top:'#000',topHi:'#000',skin:'#000',hair:'#000',pants:'#000',shoes:'#000',jacket:s0(c.s.jacket),print:s0(c.s.print)}:{}),{});ctx.restore();ctx.globalAlpha=1;});
+    if(!galVu(i)){ctx.globalAlpha=.25;}drawPerso(Object.assign({},c.s,!galVu(i)?{top:'#000',topHi:'#000',skin:'#000',hair:'#000',pants:'#000',shoes:'#000',jacket:s0(c.s.jacket),print:s0(c.s.print)}:{}),{});ctx.restore();ctx.globalAlpha=1;});
   // grand portrait
   if(galI>=0){const c=CAST[galI];const fx=70,fy=36,fw=70,fh=104;
     P(fx-3,fy-3,fw+6,fh+6,'#3a2410');P(fx-2,fy-2,fw+4,fh+4,'#f0b23c');P(fx,fy,fw,fh,'#1c3326');
@@ -408,38 +409,48 @@ function titre(){bubble.style.display='none';talking=false;conque();mode='titre'
   $('sentence').textContent='Clique pour continuer';}
 /* Présentation de chaque aventurier par Browny (texte à modifier) */
 const PRESENTE={
- geoffrey:"Geoffrey ! Contrôleur des impôts le jour, champion régional de lancer de tongs le week-end. Il collectionne aussi les cailloux qui ressemblent à des célébrités.",
- lematou:"Monsieur LeMatou, professeur de philosophie pour chats. Ses élèves dorment pendant les cours, mais il dit que c’est de la méditation. Passion : le macramé.",
- ben:"Ben, testeur professionnel de matelas. Un métier épuisant, dit-il. Le soir, il joue du kazoo dans un groupe de métal.",
- yohan:"Yohan, critique gastronomique pour les cantines scolaires. Son loisir : noter les pique-niques des inconnus dans les parcs.",
- nat:"Nathalie, motarde et accordeuse de guitares électriques. Le dimanche, elle brasse sa propre bière… dans sa baignoire.",
- coline:"Coline, cheffe de projet en organisation de réunions sur l’organisation des réunions. Hobby : le tir à l’arc. Elle vise toujours juste.",
- kayane:"Kayane, wedding planner pour les mariages de poissons rouges. Le reste du temps, elle anime trois clubs de lecture… en même temps.",
- gwendoline:"Gwendoline, standardiste dans un salon de coiffure. Elle sait tout sur tout le monde. Loisir : le tricot de bonnets pour pigeons.",
- aline:"Aline, ingénieure en fusées… miniatures. Elle bat tout le monde aux échecs, même son grille-pain connecté.",
- alexandre:"Alexandre, horloger spécialisé dans les montres qui avancent. Il fait des mots croisés à l’envers, pour corser le jeu.",
- luke:"Luke, déménageur de pianos à queue. Le soir, il fait de la peinture sur grains de riz. Délicat, le colosse.",
- medhi:"Medhi, consultant en optimisation de la sieste. Son record : quatre heures sans bouger, en réunion.",
- houcine:"Houcine, gardien de phare… dans une ville sans mer. Il adore les puzzles de 5 000 pièces, tous blancs.",
- feliz:"Feliz, jardinier de cactus. Il leur parle tous les matins. Le soir, il danse le flamenco devant son miroir.",
- amir:"Et une surprise : Amir ! Trompettiste professionnel dans un quatuor à cordes. Au quotidien, il aime cuisiner… enfin, regarder sa femme cuisiner. Rescapé de la saison dernière, il remplace un aventurier blessé au dernier moment !"};
+ geoffrey:"Geoffrey, contrôleur des impôts. Le week-end, champion régional de lancer de tongs.",
+ lematou:"Monsieur LeMatou, professeur de philosophie pour chats. Ses élèves dorment, il appelle ça méditer.",
+ ben:"Ben, testeur de matelas. Un métier épuisant, dit-il.",
+ yohan:"Yohan, critique gastronomique… de cantines scolaires.",
+ nat:"Nathalie, motarde. Elle brasse sa bière… dans sa baignoire.",
+ coline:"Coline organise des réunions sur l’organisation des réunions. Au tir à l’arc, elle vise toujours juste.",
+ kayane:"Kayane, wedding planner pour poissons rouges.",
+ gwendoline:"Gwendoline, standardiste de salon de coiffure. Elle sait tout sur tout le monde.",
+ aline:"Aline, ingénieure en fusées miniatures. Elle bat même son grille-pain aux échecs.",
+ alexandre:"Alexandre, horloger de montres qui avancent.",
+ luke:"Luke, déménageur de pianos. Le soir, il peint sur des grains de riz.",
+ medhi:"Medhi, consultant en optimisation de la sieste.",
+ houcine:"Houcine, gardien de phare… dans une ville sans mer.",
+ feliz:"Feliz, jardinier de cactus. Il leur parle tous les matins.",
+ amir:"Et une surprise : Amir, rescapé de la saison dernière ! Il remplace un aventurier blessé au dernier moment."};
 const METIER={geoffrey:'Contrôleur des impôts · Lancer de tongs',lematou:'Professeur de philosophie pour chats · Macramé',ben:'Testeur de matelas · Kazoo métal',
  yohan:'Critique gastronomique de cantines · Noter les pique-niques',nat:'Accordeuse de guitares électriques · Moto, bière maison',coline:'Organisatrice de réunions sur les réunions · Tir à l’arc',
  kayane:'Wedding planner pour poissons rouges · Clubs de lecture',gwendoline:'Standardiste de salon de coiffure · Tricot pour pigeons',aline:'Ingénieure en fusées miniatures · Échecs',
  alexandre:'Horloger de montres qui avancent · Mots croisés à l’envers',luke:'Déménageur de pianos · Peinture sur grains de riz',medhi:'Consultant en optimisation de la sieste',
  houcine:'Gardien de phare en ville · Puzzles tout blancs',feliz:'Jardinier de cactus · Flamenco',amir:'Trompettiste dans un quatuor à cordes · Regarder sa femme cuisiner'};
+/* galerie libre : Geoffrey est présenté d'office, puis on clique sur qui on veut, et « C'est parti ! » */
+let galLibre=false,galFin=null;const galVus=new Set();
+const galVu=i=>i===galI||galVus.has(i);
+async function presenter(i){galI=i;galVus.add(i);sfx();showCard(CAST[i]);await say(PRESENTE[CAST[i].id],2);}
+function galAide(){$('sentence').textContent='Clique sur un aventurier pour l’écouter ('+galVus.size+'/'+CAST.length+'), ou sur « C’est parti ! »';}
 async function galerie(){
-  const k=++tok;$('screen').style.display='none';mode='galerie';pres.x=258;pres.y=136;galI=-1;
-  await say("Et maintenant, faisons connaissance avec nos aventuriers et aventurières !",3);
-  for(let i=0;i<CAST.length;i++){if(k!==tok)return;galI=i;sfx();showCard(CAST[i]);$('sentence').textContent='Clique pour l’aventurier suivant ('+(i+1)+'/'+CAST.length+')';await say(PRESENTE[CAST[i].id],2);await wait(200);}
-  if(k!==tok)return;$('card').style.display='none';await say("Quinze aventuriers. Une seule île. Et un seul vainqueur… enfin, en théorie.",4);
+  const k=++tok;$('screen').style.display='none';mode='galerie';pres.x=258;pres.y=136;galI=-1;galVus.clear();galLibre=false;
+  await say("Et maintenant, faisons connaissance avec nos aventuriers et aventurières !",3);if(k!==tok)return;
+  await presenter(0);if(k!==tok)return;
+  await say("Les autres ? Cliquez sur leur portrait pour les découvrir… ou lancez directement l’aventure !",3);if(k!==tok)return;
+  galLibre=true;galAide();$('bGo').style.display='block';
+  await new Promise(r=>{galFin=r;});galFin=null;galLibre=false;$('bGo').style.display='none';if(k!==tok)return;
+  $('card').style.display='none';await say("Quinze aventuriers. Une seule île. Et un seul vainqueur… enfin, en théorie.",4);
   if(k===tok)finGalerie();
 }
+async function clicGalerie(x,y){const i=CAST.findIndex((c,j)=>x>=17+j*19&&x<35+j*19&&y>=4&&y<28);if(i<0||cur)return;
+  $('bGo').style.display='none';await presenter(i);if(galLibre){$('bGo').style.display='block';galAide();}}
 function showCard(c){const d=$('card');d.innerHTML='<b>'+c.nom+'</b><span>'+(METIER[c.id]||'')+'</span>';d.style.display='block';}
-function finGalerie(){$('card').style.display='none';bubble.style.display='none';mode='fin';const s=$('screen');s.style.display='flex';
+function finGalerie(){galLibre=false;$('bGo').style.display='none';$('card').style.display='none';bubble.style.display='none';mode='fin';const s=$('screen');s.style.display='flex';
   s.innerHTML='<p class="small">Chapitre 1</p><p class="big" style="font-size:clamp(14px,3.4vw,36px)">Tirage au sort<br>et manque de bol</p><p class="small">Mot de passe : 1</p><p class="small hint">Clique pour continuer</p>';$('sentence').textContent='Clique pour lancer le chapitre 1';}
 function sfx(){if(!AC.ctx)return;const t=AC.ctx.currentTime;noise(t,.4,.1,'bandpass',900);tone(523,t+.1,.25,'square',.04);tone(784,t+.2,.35,'square',.04);}
-function resetIntro(){mode='intro';pres.x=160;pres.y=122;galI=-1;$('card').style.display='none';}
+function resetIntro(){galLibre=false;if($('bGo'))$('bGo').style.display='none';mode='intro';pres.x=160;pres.y=122;galI=-1;$('card').style.display='none';}
 
 /* =========================================================
    CHAPITRE 1 — Tirage au sort et manque de bol (vignettes BD)
@@ -681,8 +692,10 @@ $('scene').onclick=e=>{initAudio();if(mode==='menu')return;if(mode==='jeu'){if($
   if(mode==='finC1'){demarrerJeu();return;}
   if(!started){started=true;$('sentence').textContent='Clique pour passer une réplique';intro();}
   else if(mode==='fin'){c1();}
+  else if(mode==='galerie'&&galLibre&&!cur){const r=$('cv').getBoundingClientRect();clicGalerie((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H);}
   else if(mode==='titre'){$('sentence').textContent='Clique pour passer une réplique';galerie();}else if(mode==='c1'&&vg.type==='planche')rapide=true;else cliquerTexte();};
 $('bSkip').onclick=()=>{initAudio();started=true;if(mode==='jeu'){fin();return;}tok++;fin();if(mode==='finC1')demarrerJeu();else if(mode==='c1'||mode==='finC1')finC1();else if(mode==='galerie'||mode==='titre')finGalerie();else titre();};
+$('bGo').onclick=e=>{e.stopPropagation();if(galFin)galFin();};
 $('bReplay').onclick=()=>{initAudio();menu();};
 /* =========================================================
    V2 : graphismes redessinés, roue d'actions (clic droit), tuto, dialogues en bas
@@ -766,9 +779,9 @@ function galFond2(){bandes(0,H,['#2a1a0e','#22150b'],W);
   [[44,'#c0392b'],[268,'#e0a820']].forEach(([x,c])=>{P(x,0,14,40,c);P(x,0,2,40,shade(c,1.3));P(x+12,0,2,40,shade(c,.7));for(let i=0;i<7;i++)P(x+i*2,40,1,3+(i%2)*2,c);P(x+4,14,6,6,shade(c,.6));P(x+5,15,4,4,shade(c,1.4));});}
 function galerie2(t){cache('galerie',W,H,galFond2);drawFire(22,128,1.1,t);drawFire(298,128,1.1,t);
   const lu=ctx.createRadialGradient(160,90,20,160,90,220);lu.addColorStop(0,'rgba(255,150,60,.08)');lu.addColorStop(1,'rgba(0,0,0,.45)');ctx.fillStyle=lu;ctx.fillRect(0,0,W,H);
-  CAST.forEach((c,i)=>{const fx=18+i*19,fy=5;P(fx-2,fy-2,20,26,'#120804');P(fx-1,fy-1,18,24,i===galI?'#f0b23c':'#7a5228');P(fx-1,fy-1,18,1,i===galI?'#ffe08a':'#a07040');P(fx,fy,16,22,i<=galI?'#24402e':'#14201a');P(fx,fy+16,16,6,i<=galI?'#2e5238':'#14201a');
+  CAST.forEach((c,i)=>{const fx=18+i*19,fy=5;P(fx-2,fy-2,20,26,'#120804');P(fx-1,fy-1,18,24,i===galI?'#f0b23c':'#7a5228');P(fx-1,fy-1,18,1,i===galI?'#ffe08a':'#a07040');P(fx,fy,16,22,galVu(i)?'#24402e':'#14201a');P(fx,fy+16,16,6,galVu(i)?'#2e5238':'#14201a');
     ctx.save();ctx.beginPath();ctx.rect(fx,fy,16,22);ctx.clip();ctx.translate(fx+8,fy+7+c.s.lh+c.s.th+c.s.hh+1);
-    if(i>galI){ctx.globalAlpha=.25;}drawPerso(Object.assign({},c.s,i>galI?{top:'#000',topHi:'#000',skin:'#000',hair:'#000',pants:'#000',shoes:'#000',jacket:s0(c.s.jacket),print:s0(c.s.print)}:{}),{});ctx.restore();ctx.globalAlpha=1;});
+    if(!galVu(i)){ctx.globalAlpha=.25;}drawPerso(Object.assign({},c.s,!galVu(i)?{top:'#000',topHi:'#000',skin:'#000',hair:'#000',pants:'#000',shoes:'#000',jacket:s0(c.s.jacket),print:s0(c.s.print)}:{}),{});ctx.restore();ctx.globalAlpha=1;});
   if(galI>=0){const c=CAST[galI];const fx=70,fy=36,fw=70,fh=104;
     P(fx-4,fy-4,fw+8,fh+8,'#120804');P(fx-3,fy-3,fw+6,fh+6,'#8a6a34');for(let k=0;k<fh+6;k+=9){P(fx-3,fy-3+k,fw+6,1,'#c0a060');}P(fx-2,fy-2,fw+4,fh+4,'#f0b23c');
     ctx.save();ctx.beginPath();ctx.rect(fx,fy,fw,fh);ctx.clip();bandes(fy,fy+fh,['#2a4a3a','#24402e','#1c3326','#162a1e'],W);

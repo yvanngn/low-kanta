@@ -53,24 +53,24 @@ def t_galerie(pw):
     b,p=page(pw)
     p.evaluate("()=>{started=true;titre();}"); p.click('#scene')
     check(p.evaluate("()=>mode")=='galerie','clic sur le titre : galerie')
-    p.evaluate("()=>{if(cur)fin();}"); p.wait_for_timeout(300); g0=p.evaluate("()=>galI"); p.wait_for_timeout(3500)
+    p.evaluate("()=>{if(cur)fin();}"); p.wait_for_timeout(300); g0=p.evaluate("()=>galI"); p.wait_for_timeout(3000)
     check(p.evaluate("()=>galI")==g0 and p.evaluate("()=>!!cur"),'galerie : on reste sur l’aventurier jusqu’au clic')
-    cartes=[]
-    for _ in range(600):
-        c=p.evaluate("()=>$('card').style.display==='block'?$('card').innerText:''")
-        if c and (not cartes or cartes[-1]!=c): cartes.append(c)
-        if p.evaluate("()=>mode")=='fin': break
-        p.evaluate("()=>{if(cur)fin();}"); p.wait_for_timeout(60)
+    check(avancer(p,"()=>galLibre",20),'galerie libre après Geoffrey')
+    check(p.evaluate("()=>galVus.size")==1 and p.evaluate("()=>CAST[galI].id")=='geoffrey','Geoffrey est présenté d’office')
+    check(p.is_visible('#bGo'),'bouton C’est parti visible')
+    box=p.locator('#cv').bounding_box(); cartes=[]
+    for i in range(1,15):
+        p.mouse.click(box['x']+(26+i*19)/320*box['width'], box['y']+16/144*box['height']); p.wait_for_timeout(80)
+        cartes.append(p.evaluate("()=>$('card').innerText")); p.evaluate("()=>{if(cur)fin();}"); p.wait_for_timeout(80)
     cast=p.evaluate("()=>CAST.map(c=>[c.id,c.nom])")
     check(len(cast)==15,'15 aventuriers')
-    check(len(cartes)==15,'une fiche par aventurier (%d)'%len(cartes))
-    for (id,nom),c in zip(cast,cartes):
-        check(c.startswith(nom),'fiche de '+nom)
-        check(p.evaluate("id=>METIER[id]",id) in c,'la fiche de %s montre métier · hobby'%nom)
+    for (id,nom),c in zip(cast[1:],cartes):
+        check(c.startswith(nom) and p.evaluate("id=>METIER[id]",id) in c,'clic sur le portrait : fiche de '+nom)
+    check(p.evaluate("()=>galVus.size")==15,'tous les aventuriers écoutés')
     check(p.evaluate("()=>CAST.every(c=>PRESENTE[c.id]&&METIER[c.id])"),'présentation et métier pour chaque aventurier')
+    p.click('#bGo'); check(avancer(p,"()=>mode==='fin'",10),'C’est parti : fin de la galerie')
     L=[t for _,t in p.evaluate("()=>__lignes")]
     check(any('Quinze aventuriers' in t for t in L),'phrase de fin : Quinze aventuriers')
-    check(cast[-1][0]=='amir' and 'Amir' in L[-2],'Amir est présenté en dernier')
     check('Chapitre 1' in ecran(p),'fin de galerie : écran Chapitre 1')
     # Passer pendant la galerie
     p.evaluate("()=>{titre();}"); p.click('#scene'); p.wait_for_timeout(200); p.click('#bSkip'); p.wait_for_timeout(200)
