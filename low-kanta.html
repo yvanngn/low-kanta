@@ -613,6 +613,8 @@ function menu(){tok++;fin();cap('');document.body.classList.remove('jeu');$('car
 menu();
 $('bSound').onclick=()=>{AC.on=!AC.on;if(AC.m)AC.m.gain.value=AC.on?.9:0;$('bSound').textContent='Son : '+(AC.on?'oui':'non');};
 
+// pas de menu du navigateur au clic droit, nulle part dans le jeu, sauf dans les champs de saisie (skill interface-jeu)
+document.getElementById('game').addEventListener('contextmenu',e=>{ if(!e.target.closest('input,textarea')) e.preventDefault(); });
 </script>
 </body>
 </html>

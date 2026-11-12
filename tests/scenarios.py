@@ -161,6 +161,7 @@ def t_menu(pw):
     check(p.evaluate("()=>mode")=='menu','le jeu s’ouvre sur le menu')
     check('LOW' in ecran(p) and 'KANTA' in ecran(p) and p.is_visible('.logo'),'logo LOW KANTA')
     check(p.is_visible('#mNew') and p.is_visible('#mPw'),'boutons Nouvelle partie et mot de passe')
+    check(p.evaluate("()=>(()=>{ const els=[...document.querySelectorAll('#game, #game button, #game div')].slice(0,60); return els.length>1&&els.every(el=>{ const e=new MouseEvent('contextmenu',{bubbles:true,cancelable:true}); el.dispatchEvent(e); return e.defaultPrevented; }); })()"),'clic droit : jamais le menu du navigateur')
     p.click('#scene',position={'x':20,'y':20}); check(p.evaluate("()=>mode")=='menu','cliquer l’image ne quitte pas le menu')
     p.fill('#mPw','zzz'); p.click('#mOk'); check('inconnu' in p.inner_text('#mMsg'),'mauvais mot de passe : message')
     p.fill('#mPw','1'); p.click('#mOk'); p.wait_for_timeout(200); check(p.evaluate("()=>mode")=='c1','mot de passe 1 : chapitre 1')
