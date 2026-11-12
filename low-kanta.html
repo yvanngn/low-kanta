@@ -854,7 +854,12 @@ function drawBois2(t){cache('bois2',W,H,boisFond2);
 
 function sourceFond2(){bandes(0,96,['#9cc4a4','#84b090','#6c9a7a','#5a8868'],W);
   for(let x=0;x<W;x+=8)disc(x,10+(rnd(x)*10|0),9,'#4e8060');
-  for(let y=0;y<96;y+=8)for(let x=84+((y/8)%2)*6;x<244;x+=12){const c=['#6e7468','#646c5e','#585f52'][(rnd(x*7+y)*3)|0];P(x,y,12,8,c);P(x,y,12,1,'#8e9688');P(x,y+7,12,1,'#3e443a');P(x+11,y,1,8,'#3e443a');if(rnd(x+y*3)>.7)P(x+2,y+1,6,2,'#5a8a3a');}
+  // falaise naturelle : rochers empilés, strates, fissures, mousse
+  P(84,0,160,96,'#566052');for(let y=4;y<96;y+=7)for(let x=84;x<244;x+=2)P(x,y+Math.round(Math.sin(x*.07+y)*2),2,1,'#4a5248');
+  for(let i=0;i<70;i++){const x=88+rnd(i+500)*152|0,y=rnd(i+600)*94|0,rx=6+(rnd(i+700)*10|0),ry=4+(rnd(i+800)*6|0),k=rnd(i+900);
+    ovale(x,y,rx,ry,k<.5?'#4a5146':'#525a4e');ovale(x-1,y-1,rx-2,Math.max(1,ry-2),k<.5?'#687062':'#747c6c');P(x-(rx>>1),y-(ry>>1),rx>>1,1,'#9aa292');P(x+(rx>>2),y+ry-1,rx>>1,1,'#3a4036');}
+  for(let i=0;i<8;i++){let x=96+rnd(i+40)*130|0,y=rnd(i+41)*60|0;for(let k=0;k<14;k++){P(x,y,1,2,'#2e342c');x+=rnd(i*9+k)>.5?1:-1;y+=2;}}
+  for(let i=0;i<26;i++){const x=88+rnd(i+300)*150|0,y=rnd(i+301)*90|0;disc(x,y,2+(i%3),'#4e7e36');P(x-1,y-2,2,1,'#7aaa4a');}
   for(let y=0;y<96;y+=9){touffe(84,y,8,['#1f4a26','#2e6a32','#4e8f42'],y);touffe(244,y,8,['#1f4a26','#2e6a32','#4e8f42'],y+50);}
   for(let i=0;i<10;i++){const x=96+(rnd(i+3)*140|0),l=10+(rnd(i+4)*24|0);if(x>144&&x<180)continue;for(let y=0;y<l;y++)P(x+Math.round(Math.sin(y/4)),y,1,1,'#3e7a34');P(x-1,l,3,2,'#5aa040');}
   [[0,1],[W-46,-1]].forEach(([x])=>{for(let i=0;i<3;i++){const tx=x+6+i*14;P(tx,0,7,104,'#3a2a1a');P(tx,0,1,104,'#5a4028');}for(let k=0;k<5;k++)touffe(x+k*10,8+(k%2)*8,10,['#16381e','#22562a','#3a7a3a'],k+x);});
@@ -873,12 +878,25 @@ function drawSource2(t){cache('source2',W,H,sourceFond2);
   for(let i=0;i<10;i++){const x=110+(rnd(i+3)*110|0),y=94+(rnd(i+4)*12|0);if(Math.sin(t/220+i*1.7)>.5)P(x,y,2,1,'#f4ffff');}
   const dx=Math.round(120+Math.sin(t/700)*40),dy=Math.round(78+Math.sin(t/300)*6);P(dx,dy,5,1,'#2ab8d0');P(dx+1,dy-1,1,1,'#e0f8ff');P(dx+3,dy-1,1,1,'#e0f8ff');P(dx+1,dy+1,1,1,'#bfe8f4');P(dx+3,dy+1,1,1,'#bfe8f4');}
 
+function planche2(v,t){cache('papier',W,H,()=>{P(0,0,W,H,'#f1e6cc');for(let y=0;y<H;y+=3)for(let x=(y/3%2)*1.5;x<W;x+=3)P(x|0,y,1,1,'#e6d8b8');for(let i=0;i<40;i++)P(rnd(i)*W|0,rnd(i+1)*H|0,2,1,'#d8c8a4');});
+  v.ordre.forEach(([k2,id],i)=>{if(i>=v.n)return;const e=EQUIPES[k2],c=perso(id),cx=8+(i%7)*44,cy=10+Math.floor(i/7)*66,cw=40,ch=60,nouv=i===v.n-1;
+    ctx.save();if(nouv){const k=Math.min(1,.7+((t/40)%10)/30);ctx.translate(cx+cw/2,cy+ch/2);ctx.rotate(-.03);ctx.translate(-cx-cw/2,-cy-ch/2);}
+    P(cx+3,cy+3,cw,ch,'rgba(0,0,0,.28)');P(cx-2,cy-2,cw+4,ch+4,'#000');P(cx-1,cy-1,cw+2,ch+2,'#fffaf0');
+    ctx.save();ctx.beginPath();ctx.rect(cx,cy,cw,ch-12);ctx.clip();
+    for(let y=cy;y<cy+ch-12;y++)P(cx,y,cw,1,lerpC(e.clair,shade(e.col,.7),(y-cy)/(ch-12)));
+    ctx.globalAlpha=.22;for(let a=0;a<12;a++){const b=a/12*6.28;ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(cx+cw/2,cy+22);ctx.lineTo(cx+cw/2+Math.cos(b)*60,cy+22+Math.sin(b)*60);ctx.lineTo(cx+cw/2+Math.cos(b+.22)*60,cy+22+Math.sin(b+.22)*60);ctx.fill();}ctx.globalAlpha=1;
+    for(let y=cy;y<cy+ch-12;y+=3)for(let x=cx+((y-cy)/3%2)*1.5;x<cx+cw;x+=3){const d=(y-cy)/(ch-12);if(d>.55)P(x|0,y,1,1,'rgba(0,0,0,.18)');}
+    ctx.translate(cx+cw/2,cy+8+c.s.lh+c.s.th+c.s.hh+1);drawPerso(c.s,{});ctx.restore();
+    drawUrne(cx+8,cy+ch-14,.5);P(cx+29,cy+29,8,7,'#000');P(cx+30,cy+30,6,5,e.clair);P(cx+30,cy+30,6,1,'#fff');P(cx+31,cy+31,2,1,'#fff');
+    P(cx,cy+ch-12,cw,12,'#fff6c8');P(cx,cy+ch-12,cw,1,'#000');P(cx,cy+ch-11,cw,1,'#fffde8');const nm=c.nom.replace('M. ','M.');drawText(nm,Math.round(cx+cw/2-nm.length*2),cy+ch-9,'#1a1a1a');
+    if(nouv&&((t/150)|0)%2){P(cx+cw-8,cy-5,12,7,'#ffd84a');P(cx+cw-8,cy-5,12,1,'#000');P(cx+cw-8,cy+1,12,1,'#000');drawText('!',cx+cw-3,cy-4,'#c0392b');}
+    ctx.restore();});}
 /* --- branchement : la V2 remplace les dessins quand elle est choisie --- */
 const render1=render;render=t=>V2?render2(t):render1(t);
 const galerie1=renderGalerie;renderGalerie=t=>V2?galerie2(t):galerie1(t);
 const plage1=plage;plage=t=>V2?plage2(t):plage1(t);
 const bandeau1=bandeau;bandeau=c=>{bandeau1(c);if(V2)trame();};
-const renderC1v1=renderC1;renderC1=t=>{if(V2&&vg.type==='ile'){ile2(t);cadreBD();return;}renderC1v1(t);};
+const renderC1v1=renderC1;renderC1=t=>{if(V2&&vg.type==='ile'){ile2(t);cadreBD();return;}if(V2&&vg.type==='planche'){planche2(vg,t);return;}renderC1v1(t);};
 ROOMS.plage.draw=t=>(V2?drawPlage2:drawPlage)(t);ROOMS.bois.draw=t=>(V2?drawBois2:drawBois)(t);ROOMS.source.draw=t=>(V2?drawSource2:drawSource)(t);
 
 /* --- interface V2 : clic gauche = action évidente, clic droit = roue --- */

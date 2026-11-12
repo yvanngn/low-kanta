@@ -205,7 +205,7 @@ def t_v2(pw):
     p.click('#mV2'); check(p.evaluate("()=>V2&&document.body.classList.contains('v2')") and 'V2' in p.inner_text('#mV2'),'menu : passage en V2')
     p.wait_for_timeout(200)
     for m in ['menu','galerie','c1']: p.evaluate("m=>{mode=m;}",m); p.wait_for_timeout(120)
-    p.evaluate("()=>{mode='c1';for(const v of [{type:'large'},{type:'pick',eq:EQUIPES.rouge,id:'ben'},{type:'ile'}]){vg=v;renderC1(500);}}")
+    p.evaluate("()=>{mode='c1';for(const v of [{type:'large'},{type:'pick',eq:EQUIPES.rouge,id:'ben'},{type:'ile'},{type:'planche',ordre:[['rouge','ben'],['jaune','yohan']],n:2}]){vg=v;renderC1(500);}}")
     p.evaluate("()=>{started=true;finC1();}"); p.click('#scene')
     check(p.is_visible('#tuto') and 'Clic gauche' in p.inner_text('#tuto'),'V2 : le tuto s’ouvre au début du jeu')
     for _ in range(4): p.click('#tuto')
