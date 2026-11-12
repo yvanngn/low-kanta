@@ -73,6 +73,9 @@ def t_galerie(pw):
     check(p.evaluate("()=>troupeSel")==7,'clic : présentation de l’aventurier cliqué')
     p.evaluate("()=>{setV2(true);renderTroupe(500);setV2(false);renderTroupe(500);}")
     check(not p.errs,'portraits de la troupe en V1 et en V2')
+    p.evaluate("()=>{lancer(MDP['0']);}"); p.wait_for_timeout(200)
+    check(not p.is_visible('#troupeFiche') and not p.is_visible('#bTroupeMenu'),'en quittant Les aventuriers, le panneau disparaît')
+    p.evaluate("()=>{troupe();}")
     p.click('#bTroupeMenu'); check(p.evaluate("()=>mode")=='menu' and not p.is_visible('#troupeFiche'),'Retour au menu')
     # Passer pendant la bande-annonce
     p.evaluate("()=>{titre();}"); p.click('#scene'); p.wait_for_timeout(200); p.wait_for_timeout(100)

@@ -256,7 +256,7 @@ function render(t){
 }
 let talking=false,gesture=0;
 let mode='intro',galI=-1;
-function loop(t){if(mode==='jeu')renderJeu(t);else if(mode==='c1'||mode==='finC1')renderC1(t);else if(mode==='galerie')renderGalerie(t);else if(mode==='bande')renderBande(t);else if(mode==='troupe')renderTroupe(t);else render(t);requestAnimationFrame(loop);} requestAnimationFrame(loop);
+function loop(t){if(mode!=='troupe'&&document.body.classList.contains('troupe'))finTroupe();if(mode!=='galerie'&&$('card').style.display==='block')$('card').style.display='none';if(mode==='jeu')renderJeu(t);else if(mode==='c1'||mode==='finC1')renderC1(t);else if(mode==='galerie')renderGalerie(t);else if(mode==='bande')renderBande(t);else if(mode==='troupe')renderTroupe(t);else render(t);requestAnimationFrame(loop);} requestAnimationFrame(loop);
 
 /* ---------- les aventuriers et aventurières (voir PERSONNAGES.md) ---------- */
 const CAST=[
@@ -748,7 +748,7 @@ $('scene').onclick=e=>{initAudio();if(mode==='menu')return;if(mode==='jeu'){if($
   else if(mode==='troupe'){const r=$('cv').getBoundingClientRect();montrerTroupe(troupeA((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H));}
   else if(mode==='galerie'&&galLibre&&!cur){const r=$('cv').getBoundingClientRect();clicGalerie((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H);}
   else if(mode==='titre'){$('sentence').textContent='Clique pour passer une réplique';bandeAnnonce();}else if(mode==='c1'&&vg.type==='planche')rapide=true;else cliquerTexte();};
-$('bSkip').onclick=()=>{initAudio();started=true;if(mode==='jeu'){fin();return;}tok++;fin();if(mode==='finC1')demarrerJeu();else if(mode==='c1'||mode==='finC1')finC1();else if(mode==='galerie'||mode==='titre'||mode==='bande')finGalerie();else titre();};
+$('bSkip').onclick=()=>{initAudio();started=true;if(mode==='troupe'){menu();return;}if(mode==='jeu'){fin();return;}tok++;fin();if(mode==='finC1')demarrerJeu();else if(mode==='c1'||mode==='finC1')finC1();else if(mode==='galerie'||mode==='titre'||mode==='bande')finGalerie();else titre();};
 $('bPasseBande').onclick=e=>{e.stopPropagation();tok++;finGalerie();};
 $('bTroupeMenu').onclick=e=>{e.stopPropagation();menu();};
 $('cv').addEventListener('mousemove',e=>{if(mode!=='troupe')return;const r=$('cv').getBoundingClientRect();montrerTroupe(troupeA((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H));});
