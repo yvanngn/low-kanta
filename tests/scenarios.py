@@ -199,7 +199,49 @@ def t_contenu(pw):
     for mot in ['Koh','KOH','Denis','origine','asiatique','arabe','espagnol','Espagne']:
         check(mot not in src,'mot interdit absent : '+mot)
 
-GROUPES={'menu':t_menu,'intro':t_intro,'galerie':t_galerie,'c1':t_c1,'jeu':t_jeu,'contenu':t_contenu}
+def t_v2(pw):
+    b,p=page(pw)
+    check(p.is_visible('#mV2') and 'V1' in p.inner_text('#mV2'),'menu : bouton Graphismes (V1 par défaut)')
+    p.click('#mV2'); check(p.evaluate("()=>V2&&document.body.classList.contains('v2')") and 'V2' in p.inner_text('#mV2'),'menu : passage en V2')
+    p.wait_for_timeout(200)
+    for m in ['menu','galerie','c1']: p.evaluate("m=>{mode=m;}",m); p.wait_for_timeout(120)
+    p.evaluate("()=>{mode='c1';for(const v of [{type:'large'},{type:'pick',eq:EQUIPES.rouge,id:'ben'},{type:'ile'}]){vg=v;renderC1(500);}}")
+    p.evaluate("()=>{started=true;finC1();}"); p.click('#scene')
+    check(p.is_visible('#tuto') and 'Clic gauche' in p.inner_text('#tuto'),'V2 : le tuto s’ouvre au début du jeu')
+    for _ in range(4): p.click('#tuto')
+    check(not p.is_visible('#tuto') and p.evaluate("()=>mode")=='jeu','V2 : après le tuto, on joue Geoffrey')
+    check(not p.is_visible('#verbs') and p.is_visible('#inv'),'V2 : pas de barre de verbes, inventaire visible')
+    p.evaluate("()=>fin()"); p.wait_for_timeout(100); p.evaluate("()=>{say('Test en bas.',0,'geoffrey');}")
+    bb=p.locator('#bubble').bounding_box(); sc=p.locator('#scene').bounding_box()
+    check(bb['y']>sc['y']+sc['height']/2,'V2 : les dialogues s’affichent en bas')
+    p.evaluate("()=>{fin();occupe=false;}")
+    box=p.locator('#cv').bounding_box()
+    def pt(wx,wy): return ((wx-p.evaluate("()=>Math.round(camX)"))/320*box['width']+box['x'], wy/144*box['height']+box['y'])
+    def ligne(): 
+        for _ in range(150):
+            if p.evaluate("()=>!!cur"): break
+            p.wait_for_timeout(20)
+        t=p.evaluate("()=>__lignes.length?__lignes[__lignes.length-1][1]:''"); p.evaluate("()=>{if(cur)fin();}")
+        for _ in range(100):
+            if not p.evaluate("()=>occupe"): break
+            p.wait_for_timeout(20)
+        return t
+    x,y=pt(426,110); p.mouse.click(x,y); ligne()
+    check(p.evaluate("()=>G.inv.includes('poisson')"),'V2 clic gauche : action évidente (prendre le poisson)')
+    p.evaluate("()=>{heros.x=heros.tx=140;heros.y=heros.ty=110;camX=camCible();}")
+    x,y=pt(80,104); p.mouse.click(x,y,button='right')
+    check(p.evaluate("()=>roueOuverte()") and p.locator('#roue button').count()==6,'V2 clic droit : la roue des 6 actions')
+    p.click('#roue button[data-v="examiner"]')
+    check('corde' in ligne().lower(),'V2 roue : examiner le bateau')
+    check(not p.evaluate("()=>roueOuverte()"),'V2 : la roue se ferme après le choix')
+    p.click('#inv .it'); check(p.evaluate("()=>sel")=='poisson','V2 inventaire : clic gauche = objet en main')
+    x,y=pt(80,104); p.mouse.click(x,y); check(ligne()==p.evaluate("()=>DEF.utiliser"),'V2 : objet en main + clic = utiliser avec')
+    p.click('#inv .it',button='right'); check('poisson' in ligne().lower(),'V2 inventaire : clic droit = examiner')
+    for room in ['plage','bois','source']: p.evaluate("r=>{G.room=r;renderJeu(900);}",room)
+    p.click('#bAide'); check(p.is_visible('#tuto'),'V2 : le bouton ? rouvre le tuto')
+    check(not p.errs,'aucune erreur JS (v2) '+str(p.errs)); b.close()
+
+GROUPES={'menu':t_menu,'intro':t_intro,'galerie':t_galerie,'c1':t_c1,'jeu':t_jeu,'v2':t_v2,'contenu':t_contenu}
 if __name__=='__main__':
     noms=sys.argv[1:] or list(GROUPES)
     with sync_playwright() as pw:
