@@ -85,6 +85,10 @@ body.jeu #jeuUI{display:grid}
 #troupeFiche i{display:block;font-style:normal;color:var(--jade);font-size:clamp(10px,1.3vw,15px);margin:.35em 0 .5em}
 #troupeFiche span{display:block;font-family:'Crete Round',Georgia,serif;font-size:clamp(11px,1.6vw,19px);line-height:1.4}
 #bTroupeMenu{position:absolute;right:3%;bottom:4%;z-index:8;display:none;min-width:0;font-size:clamp(10px,1.4vw,16px);padding:.5em 1em} body.troupe #bTroupeMenu{display:block}
+#troupeNoms{position:absolute;inset:0;pointer-events:none;display:none;z-index:5} body.v2.troupe #troupeNoms{display:block}
+#troupeNoms div{position:absolute;height:5.6%;display:flex;align-items:center;justify-content:center;font-family:'Lilita One',sans-serif;font-size:clamp(7px,1.15vw,14px);color:#f7ecd6;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden}
+#troupeNoms div.on{color:#ffd84a}
+#troupeFiche .tpor{float:left;width:clamp(56px,9vw,112px);height:auto;aspect-ratio:1;image-rendering:pixelated;margin:0 .7em .4em 0;border:3px solid var(--gold);box-shadow:0 0 0 2px #000}
 #bAide{display:none} body.v2.jeu #bAide{display:inline-block}
 body.v2 #verbs{display:none} body.v2 #jeuUI{grid-template-columns:1fr auto auto}
 @media (max-width:680px){body.v2 #jeuUI{grid-template-columns:1fr auto auto}body.v2 #inv{grid-column:auto;order:0}}
@@ -121,7 +125,7 @@ body.v2 #bubble::after{content:"▼";position:absolute;right:.8em;bottom:.45em;c
 </head>
 <body>
 <div id="game">
-  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><div id="bande"></div><div id="troupeFiche"></div><button class="mbtn" id="bTroupeMenu">Retour au menu</button><button class="sb" id="bPasseBande">Passer le générique ⏭</button><button class="mbtn" id="bGo">C’est parti !</button><div id="screen"></div></div>
+  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><div id="bande"></div><div id="troupeFiche"></div><div id="troupeNoms"></div><button class="mbtn" id="bTroupeMenu">Retour au menu</button><button class="sb" id="bPasseBande">Passer le générique ⏭</button><button class="mbtn" id="bGo">C’est parti !</button><div id="screen"></div></div>
   <div id="ui"><div id="sentence">Menu</div>
     <div id="jeuUI"><div id="verbs"></div><div id="inv"></div><button class="sb" id="bListe">Liste 0/2</button><button class="sb" id="bAide" title="Revoir le tuto">?</button></div>
     <button class="sb" id="bSkip">Passer</button><button class="sb" id="bSound">Son : oui</button><button class="sb" id="bReplay">Menu</button></div>
@@ -473,19 +477,24 @@ function renderBande(t){bandeau(BANDE_COL[bandeI%BANDE_COL.length]);const c=CAST
 let troupeSel=0;const TC=[5,32,46,6,4];// colonnes, largeur et hauteur de case, x0, y0
 const troupeCase=i=>[TC[3]+(i%TC[0])*TC[1],TC[4]+Math.floor(i/TC[0])*TC[2]];
 function troupe(){tok++;fin();mode='troupe';troupeSel=0;$('screen').style.display='none';$('fade').style.opacity=0;document.body.classList.add('troupe');
-  $('sentence').textContent='Survole ou clique sur un aventurier pour le découvrir';montrerTroupe(0);}
-function montrerTroupe(i){if(i<0)return;troupeSel=i;const c=CAST[i],d=$('troupeFiche');d.innerHTML='<b>'+c.nom+'</b><i>'+(METIER[c.id]||'')+'</i><span>'+PRESENTE[c.id]+'</span>';d.style.display='block';}
+  $('sentence').textContent='Survole ou clique sur un aventurier pour le découvrir';nomsTroupe();montrerTroupe(0);}
+function nomsTroupe(){const n=$('troupeNoms');n.innerHTML='';CAST.forEach((c,i)=>{const[cx,cy]=troupeCase(i),e=document.createElement('div');e.textContent=c.nom;e.dataset.i=i;e.style.left=(cx/W*100)+'%';e.style.top=((cy+TC[2]-10)/H*100)+'%';e.style.width=((TC[1]-2)/W*100)+'%';n.appendChild(e);});}
+function montrerTroupe(i){if(i<0)return;troupeSel=i;document.querySelectorAll('#troupeNoms div').forEach(x=>x.classList.toggle('on',+x.dataset.i===i));const c=CAST[i],d=$('troupeFiche');d.innerHTML=(V2?'':'')+'<b>'+c.nom+'</b><i>'+(METIER[c.id]||'')+'</i><span>'+PRESENTE[c.id]+'</span>';d.style.display='block';if(V2)d.prepend(portraitV2(c.s));}
 function troupeA(x,y){for(let i=0;i<CAST.length;i++){const[cx,cy]=troupeCase(i);if(x>=cx&&x<cx+TC[1]-2&&y>=cy&&y<cy+TC[2]-2)return i;}return -1;}
 /* V2 : détails de portrait au demi-pixel (lumière, regard, joues, plis) — appelé en échelle 2 */
 function buste2(s){const legTop=-s.lh,torTop=legTop-s.th,headTop=torTop-1-s.hh,hw=s.hw,tw=s.tw,hl=-hw/2,tl=-tw/2,ey=headTop+Math.floor(s.hh/2),sk=s.skin;
   P(hw/2-.5,headTop+1,.5,s.hh-1,shade(sk,.86));P(hl,headTop+s.hh-.5,hw,.5,shade(sk,.84));P(hl+.5,headTop+1,.5,s.hh-3,shade(sk,1.08));
   P(-1,torTop-1,2,.5,shade(sk,.7));P(-.5,ey+1.5,.5,.5,shade(sk,.78));
   ctx.globalAlpha=.4;P(-3.5,ey+1.5,1,.5,'#e86a6a');P(2.5,ey+1.5,1,.5,'#e86a6a');ctx.globalAlpha=1;
-  if(!s.yeuxFins){P(-2,ey,.5,.5,'#ffffff');P(1,ey,.5,.5,'#ffffff');}
+  if(!s.yeuxFins){P(-2.5,ey,.5,1,'#f4efe6');P(1.5,ey,.5,1,'#f4efe6');P(-2,ey,.5,.5,'#ffffff');P(1,ey,.5,.5,'#ffffff');}
+  for(let k=0;k<hw;k+=1.5)P(hl+k,headTop-1.5+(k%3?0:.5),.5,.5,shade(s.hair,.7));P(-1,ey+3.5,1.5,.5,shade(sk,.82));
   if(s.glasses){ctx.globalAlpha=.5;P(-3.5,ey-.5,1,.5,'#ffffff');P(.5,ey-.5,1,.5,'#ffffff');ctx.globalAlpha=1;}
   P(hl,headTop-2,hw/2,.5,shade(s.hair,1.6));P(hl+1,headTop-1.5,1.5,.5,shade(s.hair,1.35));
   P(tl+.5,torTop+2,.5,s.th-4,shade(s.top,.82));P(tw/2-1,torTop+1,.5,s.th-3,shade(s.top,1.15));P(-1.5,torTop,3,.5,shade(s.top,.65));
   if(s.bandana)P(hl,headTop+1,hw,.5,shade(s.bandana,1.35));}
+function portraitV2(s){const c=document.createElement('canvas');c.width=28;c.height=28;c.className='tpor';const g=c.getContext('2d'),old=ctx;ctx=g;g.imageSmoothingEnabled=false;
+  const gr=g.createRadialGradient(14,10,2,14,14,20);gr.addColorStop(0,'#3e6a4a');gr.addColorStop(1,'#12221a');g.fillStyle=gr;g.fillRect(0,0,28,28);
+  g.save();g.translate(14,4+(s.lh+s.th+1+s.hh+3)*2);g.scale(2,2);drawPerso(s,{});buste2(s);g.restore();ctx=old;return c;}
 function finTroupe(){document.body.classList.remove('troupe');$('troupeFiche').style.display='none';}
 function renderTroupe(t){if(V2)cache('galerie',W,H,galFond2);else{vgrad(0,H,'#0e0a07','#1d130b');for(let x=0;x<W;x+=22)P(x,0,1,H,'#0a0705');}
   ctx.globalAlpha=.35;P(0,0,W,H,'#000');ctx.globalAlpha=1;
@@ -497,7 +506,7 @@ function renderTroupe(t){if(V2)cache('galerie',W,H,galFond2);else{vgrad(0,H,'#0e
     else P(cx,cy,w,h,on?'#2e5238':'#1c3326');
     if(e)P(cx,cy,w,2,e.col);
     ctx.save();ctx.beginPath();ctx.rect(cx,cy,w,h-7);ctx.clip();ctx.translate(cx+w/2,cy+8+2*(c.s.lh+c.s.th+1+c.s.hh)+(on?Math.round(Math.sin(t/150)):0));ctx.scale(2,2);drawPerso(c.s,{talk:on&&((t/200|0)%2)});if(V2)buste2(c.s);ctx.restore();
-    P(cx,cy+h-7,w,7,on?'#ffd84a':'#fff6c8');const nm=c.nom.replace('M. ','').toUpperCase().slice(0,7);drawText(nm,Math.round(cx+w/2-nm.length*2),cy+h-6,'#1a1a1a');});}
+    if(V2){ctx.globalAlpha=.85;P(cx,cy+h-8,w,8,'#120804');ctx.globalAlpha=1;P(cx,cy+h-8,w,1,on?'#ffd84a':'#8a6a34');}else{P(cx,cy+h-7,w,7,on?'#ffd84a':'#fff6c8');const nm=c.nom.replace('M. ','').toUpperCase().slice(0,7);drawText(nm,Math.round(cx+w/2-nm.length*2),cy+h-6,'#1a1a1a');}});}
 function showCard(c){const d=$('card');d.innerHTML='<b>'+c.nom+'</b><span>'+(METIER[c.id]||'')+'</span>';d.style.display='block';}
 function finGalerie(){document.body.classList.remove('bande');$('bande').style.display='none';bandeNext=null;galLibre=false;$('bGo').style.display='none';$('card').style.display='none';bubble.style.display='none';mode='fin';const s=$('screen');s.style.display='flex';
   s.innerHTML='<p class="small">Chapitre 1</p><p class="big" style="font-size:clamp(14px,3.4vw,36px)">Tirage au sort<br>et manque de bol</p><p class="small">Mot de passe : 1</p><p class="small hint">Clique pour continuer</p>';$('sentence').textContent='Clique pour lancer le chapitre 1';}
