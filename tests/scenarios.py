@@ -83,8 +83,9 @@ def t_galerie(pw):
     L=[t for _,t in p.evaluate("()=>__lignes")]
     check(any('Quinze aventuriers' in t for t in L),'phrase de fin : Quinze aventuriers')
     # Passer pendant la bande-annonce
-    p.evaluate("()=>{titre();}"); p.click('#scene'); p.wait_for_timeout(200); p.click('#bSkip'); p.wait_for_timeout(200)
-    check(p.evaluate("()=>mode")=='fin','Passer pendant la bande-annonce mène à l’écran Chapitre 1')
+    p.evaluate("()=>{titre();}"); p.click('#scene'); p.wait_for_timeout(200); p.wait_for_timeout(100)
+    check(p.is_visible('#bPasseBande'),'bouton Passer le générique visible'); p.click('#bPasseBande'); p.wait_for_timeout(200)
+    check(p.evaluate("()=>mode")=='fin' and not p.is_visible('#bPasseBande'),'Passer le générique mène à l’écran Chapitre 1')
     check(not p.errs,'aucune erreur JS (galerie) '+str(p.errs)); b.close()
 
 def t_c1(pw):

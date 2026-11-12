@@ -79,6 +79,7 @@ body.jeu #jeuUI{display:grid}
 #bande span{display:inline-block;margin-top:.6em;font-family:'Crete Round',Georgia,serif;font-size:clamp(12px,2vw,24px);background:#fff6c8;color:#1a1a1a;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:.25em .5em}
 #bande.in b{animation:bandeb .3s cubic-bezier(.2,1.6,.4,1)} #bande.in span{animation:bandeb .3s .12s cubic-bezier(.2,1.6,.4,1) backwards}
 @keyframes bandeb{from{transform:translateX(60px) rotate(-3deg) scale(1.4);opacity:0}}
+#bPasseBande{position:absolute;right:3%;top:6%;z-index:8;display:none;margin:0;font-size:clamp(9px,1.3vw,15px);padding:.5em .8em} body.bande #bPasseBande{display:block}
 #bAide{display:none} body.v2.jeu #bAide{display:inline-block}
 body.v2 #verbs{display:none} body.v2 #jeuUI{grid-template-columns:1fr auto auto}
 @media (max-width:680px){body.v2 #jeuUI{grid-template-columns:1fr auto auto}body.v2 #inv{grid-column:auto;order:0}}
@@ -115,7 +116,7 @@ body.v2 #bubble::after{content:"▼";position:absolute;right:.8em;bottom:.45em;c
 </head>
 <body>
 <div id="game">
-  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><div id="bande"></div><button class="mbtn" id="bGo">C’est parti !</button><div id="screen"></div></div>
+  <div id="scene"><canvas id="cv" width="320" height="144"></canvas><div id="bubble"></div><div id="card"></div><div id="cap"></div><div id="cur"><b></b><i></i><i></i><i></i><i></i></div><div id="roue"></div><div id="fade"></div><div id="tuto"></div><div id="bande"></div><button class="sb" id="bPasseBande">Passer le générique ⏭</button><button class="mbtn" id="bGo">C’est parti !</button><div id="screen"></div></div>
   <div id="ui"><div id="sentence">Menu</div>
     <div id="jeuUI"><div id="verbs"></div><div id="inv"></div><button class="sb" id="bListe">Liste 0/2</button><button class="sb" id="bAide" title="Revoir le tuto">?</button></div>
     <button class="sb" id="bSkip">Passer</button><button class="sb" id="bSound">Son : oui</button><button class="sb" id="bReplay">Menu</button></div>
@@ -453,21 +454,21 @@ async function clicGalerie(x,y){const i=CAST.findIndex((c,j)=>x>=17+j*19&&x<35+j
   $('bGo').style.display='none';await presenter(i);if(galLibre){$('bGo').style.display='block';galAide();}}
 /* bande-annonce : chaque aventurier 1,5 s, nom et métier en gros, façon générique télé */
 let bandeI=0,bandeT0=0,bandeNext=null;const BANDE_COL=['#c0392b','#e0a820','#2a8ab0','#4f7a3a','#8a3a8a'];
-async function bandeAnnonce(){const k=++tok;$('screen').style.display='none';bubble.style.display='none';mode='bande';galI=-1;
+async function bandeAnnonce(){const k=++tok;document.body.classList.add('bande');$('screen').style.display='none';bubble.style.display='none';mode='bande';galI=-1;
   $('sentence').textContent='Clique pour accélérer · « Les aventuriers » au menu pour tout savoir';
   for(let i=0;i<CAST.length;i++){if(k!==tok)return;bandeI=i;bandeT0=performance.now();sfx();
     const d=$('bande'),c=CAST[i];d.innerHTML='<b>'+c.nom+'</b><span>'+(METIER[c.id]||'')+'</span>';d.style.display='block';d.classList.remove('in');void d.offsetWidth;d.classList.add('in');
     await new Promise(r=>{const tm=setTimeout(r,1500);bandeNext=()=>{clearTimeout(tm);r();};});bandeNext=null;}
   if(k===tok){$('bande').style.display='none';finGalerie();}}
-function renderBande(t){bandeau(BANDE_COL[bandeI%BANDE_COL.length]);const c=CAST[bandeI],dt=Math.min(1,(t-bandeT0)/220),x=Math.round(-40+130*(1-Math.pow(1-dt,3)));
-  ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(x,140,22,4,0,0,7);ctx.fill();
-  ctx.save();ctx.translate(x,140);ctx.scale(3,3);drawPerso(c.s,{});ctx.restore();
+function renderBande(t){bandeau(BANDE_COL[bandeI%BANDE_COL.length]);const c=CAST[bandeI],dt=Math.min(1,(t-bandeT0)/220),x=Math.round(-40+120*(1-Math.pow(1-dt,3)));
+  ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(x,130,16,3,0,0,7);ctx.fill();
+  ctx.save();ctx.translate(x,130);ctx.scale(2,2);drawPerso(c.s,{});ctx.restore();
   if(t-bandeT0<90){ctx.globalAlpha=.7;P(0,0,W,H,'#fff');ctx.globalAlpha=1;}cadreBD();}
 function showCard(c){const d=$('card');d.innerHTML='<b>'+c.nom+'</b><span>'+(METIER[c.id]||'')+'</span>';d.style.display='block';}
-function finGalerie(){$('bande').style.display='none';bandeNext=null;galLibre=false;$('bGo').style.display='none';$('card').style.display='none';bubble.style.display='none';mode='fin';const s=$('screen');s.style.display='flex';
+function finGalerie(){document.body.classList.remove('bande');$('bande').style.display='none';bandeNext=null;galLibre=false;$('bGo').style.display='none';$('card').style.display='none';bubble.style.display='none';mode='fin';const s=$('screen');s.style.display='flex';
   s.innerHTML='<p class="small">Chapitre 1</p><p class="big" style="font-size:clamp(14px,3.4vw,36px)">Tirage au sort<br>et manque de bol</p><p class="small">Mot de passe : 1</p><p class="small hint">Clique pour continuer</p>';$('sentence').textContent='Clique pour lancer le chapitre 1';}
 function sfx(){if(!AC.ctx)return;const t=AC.ctx.currentTime;noise(t,.4,.1,'bandpass',900);tone(523,t+.1,.25,'square',.04);tone(784,t+.2,.35,'square',.04);}
-function resetIntro(){galLibre=false;if($('bGo'))$('bGo').style.display='none';mode='intro';pres.x=160;pres.y=122;galI=-1;$('card').style.display='none';}
+function resetIntro(){document.body.classList.remove('bande');galLibre=false;if($('bGo'))$('bGo').style.display='none';mode='intro';pres.x=160;pres.y=122;galI=-1;$('card').style.display='none';}
 
 /* =========================================================
    CHAPITRE 1 — Tirage au sort et manque de bol (vignettes BD)
@@ -713,6 +714,7 @@ $('scene').onclick=e=>{initAudio();if(mode==='menu')return;if(mode==='jeu'){if($
   else if(mode==='galerie'&&galLibre&&!cur){const r=$('cv').getBoundingClientRect();clicGalerie((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H);}
   else if(mode==='titre'){$('sentence').textContent='Clique pour passer une réplique';bandeAnnonce();}else if(mode==='c1'&&vg.type==='planche')rapide=true;else cliquerTexte();};
 $('bSkip').onclick=()=>{initAudio();started=true;if(mode==='jeu'){fin();return;}tok++;fin();if(mode==='finC1')demarrerJeu();else if(mode==='c1'||mode==='finC1')finC1();else if(mode==='galerie'||mode==='titre'||mode==='bande')finGalerie();else titre();};
+$('bPasseBande').onclick=e=>{e.stopPropagation();tok++;finGalerie();};
 $('bGo').onclick=e=>{e.stopPropagation();if(galFin)galFin();};
 $('bReplay').onclick=()=>{initAudio();menu();};
 /* =========================================================
