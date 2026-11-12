@@ -53,6 +53,8 @@ def t_galerie(pw):
     b,p=page(pw)
     p.evaluate("()=>{started=true;titre();}"); p.click('#scene')
     check(p.evaluate("()=>mode")=='galerie','clic sur le titre : galerie')
+    p.evaluate("()=>{if(cur)fin();}"); p.wait_for_timeout(300); g0=p.evaluate("()=>galI"); p.wait_for_timeout(3500)
+    check(p.evaluate("()=>galI")==g0 and p.evaluate("()=>!!cur"),'galerie : on reste sur l’aventurier jusqu’au clic')
     cartes=[]
     for _ in range(600):
         c=p.evaluate("()=>$('card').style.display==='block'?$('card').innerText:''")

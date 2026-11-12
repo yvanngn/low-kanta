@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Low Kanta</title>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Press+Start+2P&family=Rubik+Dirt&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Crete+Round&family=Press+Start+2P&family=Rubik+Dirt&display=swap" rel="stylesheet">
 <style>
 :root{--page:#0b1410;--lac:#1a120c;--lac2:#2b1d12;--red:#8a3a14;--red-hi:#b4501f;--gold:#f0b23c;--jade:#7fc98f;--ink:#f7ecd6;--muted:#b59e80;color-scheme:dark}
 :root:not([data-theme="light"]){--page:#0b1410}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--page:#0b1410}}
 :root[data-theme="dark"]{--page:#0b1410}
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--page);color:var(--ink);font-family:'Press Start 2P',ui-monospace,monospace;display:flex;justify-content:center;min-height:100vh}
+body{margin:0;background:var(--page);color:var(--ink);font-family:'Lilita One','Press Start 2P',system-ui,sans-serif;letter-spacing:.02em;display:flex;justify-content:center;min-height:100vh}
 #game{position:relative;width:100%;max-width:1280px;background:var(--lac);border-left:4px solid #000;border-right:4px solid #000;user-select:none;-webkit-user-select:none}
 #scene{position:relative;width:100%;aspect-ratio:320/144;overflow:hidden;background:#000;cursor:pointer}
 #cv{width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges}
@@ -85,7 +85,7 @@ body.v2 #verbs{display:none} body.v2 #jeuUI{grid-template-columns:1fr auto auto}
 #roue button:hover,#roue button:focus-visible{background:var(--gold);color:#2a160f;text-shadow:none;outline:none}
 @keyframes rouep{from{transform:translate(-50%,-50%) scale(.2);opacity:0}}
 body.v2 #bubble{left:2%!important;right:2%;top:auto!important;bottom:3%!important;transform:none;max-width:none;justify-content:flex-start;text-align:left;
-  font-family:'Pixelify Sans','Press Start 2P',monospace;font-size:clamp(11px,1.9vw,22px);line-height:1.35;color:var(--ink);text-shadow:2px 2px 0 #000;
+  font-family:'Crete Round',Georgia,serif;font-size:clamp(11px,1.9vw,22px);line-height:1.35;color:var(--ink);text-shadow:2px 2px 0 #000;
   background:linear-gradient(180deg,rgba(40,24,13,.96),rgba(16,9,5,.96));border:3px solid var(--gold);border-radius:4px;
   box-shadow:0 0 0 3px #000,inset 0 0 0 2px rgba(0,0,0,.6),inset 0 3px 0 rgba(255,220,160,.15);padding:.55em 2.4em .55em .6em;gap:.8em;pointer-events:auto;cursor:pointer;animation:monte .18s ease-out}
 body.v2 #bubble .nom{color:var(--c,#8fc8ff);font-size:.78em;letter-spacing:.06em;opacity:1;margin-bottom:.2em}
@@ -94,10 +94,16 @@ body.v2 #bubble::after{content:"▼";position:absolute;right:.8em;bottom:.45em;c
 @keyframes clig{50%{opacity:0}} @keyframes monte{from{transform:translateY(10px);opacity:0}}
 #tuto{position:absolute;inset:0;z-index:25;display:none;align-items:center;justify-content:center;background:rgba(8,5,3,.72);cursor:pointer}
 #tuto .tbox{width:min(80%,660px);background:linear-gradient(#2b1d12,#1a120c);border:3px solid var(--gold);box-shadow:0 0 0 3px #000,6px 6px 0 #000;padding:1em 1.2em;
-  font-family:'Pixelify Sans','Press Start 2P',monospace;font-size:clamp(11px,1.8vw,21px);line-height:1.4;text-align:left;animation:monte .2s ease-out}
-#tuto .tt{color:var(--gold);font-family:'Press Start 2P',monospace;font-size:.72em;margin:0 0 .7em} #tuto p{margin:.2em 0} #tuto .tp{color:var(--jade);font-size:.7em;margin-top:.9em;text-align:right}
+  font-family:'Crete Round',Georgia,serif;font-size:clamp(11px,1.8vw,21px);line-height:1.4;text-align:left;animation:monte .2s ease-out}
+#tuto .tt{color:var(--gold);font-family:'Lilita One',sans-serif;font-size:1.1em;margin:0 0 .7em} #tuto p{margin:.2em 0} #tuto .tp{color:var(--jade);font-size:.7em;margin-top:.9em;text-align:right}
 #tuto .demo{display:flex;gap:.4em;flex-wrap:wrap;margin:.5em 0}
 #tuto .demo span{background:var(--red);border:2px solid #000;border-radius:50%;width:2.2em;height:2.2em;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(240,178,60,.7)}
+/* police d'aventure : plus grande que l'ancienne police pixel */
+.vb,.sb,.pw input,.pw button{font-size:clamp(12px,1.5vw,18px)} .mbtn{font-size:clamp(13px,1.7vw,20px)}
+#sentence{font-size:clamp(13px,1.6vw,20px)} .small{font-size:clamp(12px,1.5vw,18px)} .tagline{font-size:clamp(10px,1.4vw,16px)} .msg{font-size:clamp(11px,1.3vw,16px)}
+#bubble{font-family:'Crete Round',Georgia,serif;font-size:clamp(12px,2vw,22px)} #bubble .nom{font-family:'Lilita One',sans-serif;letter-spacing:.06em}
+#card,#cap{font-size:clamp(10px,1.4vw,17px)} #card span{font-family:'Crete Round',Georgia,serif} #roue .rc{font-size:clamp(9px,1.2vw,14px)} #roue button{font-size:clamp(8px,1vw,12px)}
+.big{font-family:'Rubik Dirt','Lilita One',sans-serif;letter-spacing:.03em}
 @media (prefers-reduced-motion:reduce){#roue button,body.v2 #bubble,#tuto .tbox{animation:none}body.v2 #bubble::after{animation:none}}
 </style>
 </head>
@@ -377,7 +383,7 @@ let qui='browny';
 function say(text,ges,who){qui=who||'browny';const v=voix(who);return new Promise(res=>{bubble.innerHTML='';bubble.style.color=v.c;bubble.style.setProperty('--c',v.c);bubble.appendChild(portrait(v));const sp=document.createElement('span');
   sp.innerHTML='<b class="nom">'+v.nom+'</b>';const tn=document.createTextNode('');sp.appendChild(tn);bubble.appendChild(sp);bubble.style.display='flex';
   if(mode==='galerie'||mode==='c1'){bubble.style.top='auto';bubble.style.bottom='3%';}else{bubble.style.top='4%';bubble.style.bottom='auto';}
-  talking=true;gesture=ges||0;const d=Math.max(2200,text.length*65+1200);cur={res,timer:setTimeout(fin,d),typing:true,tn,text,i:0};
+  talking=true;gesture=ges||0;const d=Math.max(2200,text.length*65+1200);cur={res,timer:mode==='galerie'?null:setTimeout(fin,d),typing:true,tn,text,i:0};
   const c=cur;c.iv=setInterval(()=>{if(cur!==c||!c.typing){clearInterval(c.iv);return;}c.i+=1;tn.data=text.slice(0,c.i);if(c.i>=text.length)finirTexte();},28);});}
 /* un clic pendant que le texte s'écrit le termine ; le clic suivant passe à la suite */
 function finirTexte(){if(!cur||!cur.typing)return false;cur.typing=false;clearInterval(cur.iv);cur.tn.data=cur.text;return true;}
@@ -425,7 +431,7 @@ const METIER={geoffrey:'Contrôleur des impôts · Lancer de tongs',lematou:'Pro
 async function galerie(){
   const k=++tok;$('screen').style.display='none';mode='galerie';pres.x=258;pres.y=136;galI=-1;
   await say("Et maintenant, faisons connaissance avec nos aventuriers et aventurières !",3);
-  for(let i=0;i<CAST.length;i++){if(k!==tok)return;galI=i;sfx();showCard(CAST[i]);await say(PRESENTE[CAST[i].id],2);await wait(200);}
+  for(let i=0;i<CAST.length;i++){if(k!==tok)return;galI=i;sfx();showCard(CAST[i]);$('sentence').textContent='Clique pour l’aventurier suivant ('+(i+1)+'/'+CAST.length+')';await say(PRESENTE[CAST[i].id],2);await wait(200);}
   if(k!==tok)return;$('card').style.display='none';await say("Quinze aventuriers. Une seule île. Et un seul vainqueur… enfin, en théorie.",4);
   if(k===tok)finGalerie();
 }
