@@ -52,7 +52,18 @@ def t_intro(pw):
 def t_galerie(pw):
     b,p=page(pw)
     p.evaluate("()=>{started=true;titre();}"); p.click('#scene')
-    check(p.evaluate("()=>mode")=='galerie','clic sur le titre : galerie')
+    check(p.evaluate("()=>mode")=='bande','clic sur le titre : bande-annonce')
+    noms=[]
+    for _ in range(200):
+        if p.evaluate("()=>mode")!='bande': break
+        n=p.evaluate("()=>$('bande').querySelector('b')?$('bande').querySelector('b').textContent:''")
+        if n and (not noms or noms[-1]!=n): noms.append(n)
+        p.evaluate("()=>{renderBande(performance.now());}"); p.wait_for_timeout(250)
+        if len(noms)>=3: p.click('#scene'); p.wait_for_timeout(50)
+    check(len(noms)==15,'bande-annonce : les 15 aventuriers défilent (%d)'%len(noms))
+    check(p.evaluate("()=>mode")=='fin' and 'Chapitre 1' in ecran(p),'après la bande-annonce : écran Chapitre 1')
+    p.evaluate("()=>{menu();}"); p.click('#mCast'); p.wait_for_timeout(200)
+    check(p.evaluate("()=>mode")=='galerie','menu : Les aventuriers ouvre la galerie complète')
     p.evaluate("()=>{if(cur)fin();}"); p.wait_for_timeout(300); g0=p.evaluate("()=>galI"); p.wait_for_timeout(3000)
     check(p.evaluate("()=>galI")==g0 and p.evaluate("()=>!!cur"),'galerie : on reste sur l’aventurier jusqu’au clic')
     check(avancer(p,"()=>galLibre",20),'galerie libre après Geoffrey')
@@ -68,13 +79,12 @@ def t_galerie(pw):
         check(c.startswith(nom) and p.evaluate("id=>METIER[id]",id) in c,'clic sur le portrait : fiche de '+nom)
     check(p.evaluate("()=>galVus.size")==15,'tous les aventuriers écoutés')
     check(p.evaluate("()=>CAST.every(c=>PRESENTE[c.id]&&METIER[c.id])"),'présentation et métier pour chaque aventurier')
-    p.click('#bGo'); check(avancer(p,"()=>mode==='fin'",10),'C’est parti : fin de la galerie')
+    p.click('#bGo'); check(avancer(p,"()=>mode==='menu'",10),'C’est parti : retour au menu')
     L=[t for _,t in p.evaluate("()=>__lignes")]
     check(any('Quinze aventuriers' in t for t in L),'phrase de fin : Quinze aventuriers')
-    check('Chapitre 1' in ecran(p),'fin de galerie : écran Chapitre 1')
-    # Passer pendant la galerie
+    # Passer pendant la bande-annonce
     p.evaluate("()=>{titre();}"); p.click('#scene'); p.wait_for_timeout(200); p.click('#bSkip'); p.wait_for_timeout(200)
-    check(p.evaluate("()=>mode")=='fin','Passer pendant la galerie mène à l’écran Chapitre 1')
+    check(p.evaluate("()=>mode")=='fin','Passer pendant la bande-annonce mène à l’écran Chapitre 1')
     check(not p.errs,'aucune erreur JS (galerie) '+str(p.errs)); b.close()
 
 def t_c1(pw):
