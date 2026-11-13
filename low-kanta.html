@@ -51,7 +51,7 @@ body.jeu #jeuUI{display:grid}
 .it{width:48px;height:48px;background:#7a4a34;border:2px solid var(--gold);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
 .it canvas{width:36px;height:36px;image-rendering:pixelated} .it.sel{outline:3px solid var(--gold);background:#5c3a14}
 @media (max-width:680px){#jeuUI{grid-template-columns:1fr auto}#inv{grid-column:1/-1;order:3}}
-#card b{display:block;color:var(--gold);font-size:1.4em;margin-bottom:.4em;font-weight:normal}
+#card b{display:block;color:#ffe680;font-family:'Lilita One',sans-serif;text-shadow:2px 2px 0 #000;font-size:1.4em;margin-bottom:.4em;font-weight:normal}
 #ui{background:linear-gradient(var(--lac2),var(--lac));border-top:4px solid var(--gold);padding:10px;text-align:center}
 #sentence{color:var(--jade);font-size:clamp(9px,1.2vw,14px);margin:4px 0 10px;text-shadow:2px 2px 0 #000;min-height:1.4em}
 .sb{font:inherit;font-size:clamp(9px,1.1vw,13px);background:var(--red);color:var(--ink);border:2px solid #000;box-shadow:inset 0 -4px 0 rgba(0,0,0,.35);padding:10px 14px;cursor:pointer;margin:0 4px}
@@ -75,13 +75,13 @@ body.jeu #jeuUI{display:grid}
 /* ---------- V2 : roue d'actions, tuto, dialogues en bas ---------- */
 #bGo{position:absolute;right:3%;top:62%;z-index:8;display:none;min-width:0;animation:pulse 1.4s ease-in-out infinite}
 #bande{position:absolute;left:42%;right:4%;top:28%;display:none;pointer-events:none;text-align:left;z-index:6}
-#bande b{display:block;font-family:'Rubik Dirt','Lilita One',sans-serif;font-weight:normal;font-size:clamp(28px,7vw,84px);line-height:1;color:#ffd84a;-webkit-text-stroke:2px #1a0a04;filter:drop-shadow(4px 4px 0 #000);transform:rotate(-3deg)}
+#bande b{display:inline-block;font-family:'Lilita One',sans-serif;font-weight:normal;font-size:clamp(28px,7vw,84px);line-height:1.05;letter-spacing:.03em;color:#ffe680;-webkit-text-stroke:.12em #1a0a04;paint-order:stroke fill;text-shadow:.06em .07em 0 #000;transform:rotate(-3deg);background:rgba(20,10,4,.55);padding:.05em .3em .1em;border-radius:.12em}
 #bande span{display:inline-block;margin-top:.6em;font-family:'Crete Round',Georgia,serif;font-size:clamp(10px,1.7vw,21px);line-height:1.35;background:#fff6c8;color:#1a1a1a;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:.25em .5em}
 #bande.in b{animation:bandeb .3s cubic-bezier(.2,1.6,.4,1)} #bande.in span{animation:bandeb .3s .12s cubic-bezier(.2,1.6,.4,1) backwards}
 @keyframes bandeb{from{transform:translateX(60px) rotate(-3deg) scale(1.4);opacity:0}}
 #bPasseBande{position:absolute;right:3%;top:6%;z-index:8;display:none;margin:0;font-size:clamp(9px,1.3vw,15px);padding:.5em .8em} body.bande #bPasseBande{display:block}
 #troupeFiche{position:absolute;left:53%;right:3%;top:5%;bottom:22%;display:none;overflow:auto;background:linear-gradient(#2b1d12,#1a120c);border:3px solid var(--gold);box-shadow:0 0 0 3px #000,5px 5px 0 #000;padding:.7em .9em;text-align:left;z-index:6}
-#troupeFiche b{display:block;font-family:'Rubik Dirt','Lilita One',sans-serif;font-weight:normal;color:#ffd84a;font-size:clamp(18px,3.6vw,42px);line-height:1;-webkit-text-stroke:1px #1a0a04}
+#troupeFiche b{display:block;font-family:'Lilita One',sans-serif;font-weight:normal;color:#ffe680;font-size:clamp(18px,3.6vw,42px);line-height:1.05;letter-spacing:.03em;-webkit-text-stroke:.1em #1a0a04;paint-order:stroke fill;text-shadow:.05em .06em 0 #000}
 #troupeFiche i{display:block;font-style:normal;color:var(--jade);font-size:clamp(10px,1.3vw,15px);margin:.35em 0 .5em}
 #troupeFiche span{display:block;font-family:'Crete Round',Georgia,serif;font-size:clamp(11px,1.6vw,19px);line-height:1.4}
 #bTroupeMenu{position:absolute;right:3%;bottom:4%;z-index:8;display:none;min-width:0;font-size:clamp(10px,1.4vw,16px);padding:.5em 1em} body.troupe #bTroupeMenu{display:block}
