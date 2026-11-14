@@ -258,6 +258,8 @@ def t_v2(pw):
     p.click('#inv .it',button='right'); check('poisson' in ligne().lower(),'V2 inventaire : clic droit = examiner')
     for room in ['plage','bois','source']: p.evaluate("r=>{G.room=r;renderJeu(900);}",room)
     p.click('#bAide'); check(p.is_visible('#tuto'),'V2 : le bouton ? rouvre le tuto')
+    fr=p.evaluate("()=>{const c=document.createElement('canvas');c.width=40;c.height=60;const g=c.getContext('2d'),o=ctx;ctx=g;const out=[];for(let f=0;f<MARCHE_N;f++){g.clearRect(0,0,40,60);g.save();g.translate(20,56);drawPersoProfil(aG(),f,{});g.restore();out.push(c.toDataURL());}ctx=o;return [MARCHE_N,new Set(out).size];}")
+    check(fr[0]==8 and fr[1]>=6,'marche : cycle de 8 images différentes '+str(fr))
     check(not p.errs,'aucune erreur JS (v2) '+str(p.errs)); b.close()
 
 def t_mobile(pw):
