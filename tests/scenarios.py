@@ -51,6 +51,13 @@ def t_intro(pw):
 
 def t_galerie(pw):
     b,p=page(pw)
+    p.evaluate("()=>{lancer(MDP['0']);}"); p.wait_for_timeout(300)
+    suite=[]
+    for _ in range(5):
+        p.click('#bSkip'); p.wait_for_timeout(250); suite.append(p.evaluate("()=>mode"))
+    check(suite[:3]==['titre','fin','c1'],'Passer avance sans boucler : '+' > '.join(suite))
+    p.evaluate("()=>{menu();}"); p.click('#bSkip'); p.wait_for_timeout(150)
+    check(p.evaluate("()=>mode")=='menu','Passer au menu ne relance pas l’intro')
     p.evaluate("()=>{started=true;titre();}"); p.click('#scene')
     check(p.evaluate("()=>mode")=='bande','clic sur le titre : bande-annonce')
     noms=[]
