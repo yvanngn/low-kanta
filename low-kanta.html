@@ -732,14 +732,24 @@ async function clicObjet(id){if(occupe)return;const it=ITEMS[id];occupe=true;
     else await dit(it[verbe]||DEF[verbe]);
   }finally{occupe=false;if(sel!==id||(verbe!=='utiliser'&&verbe!=='donner')){verbe=null;sel=null;}majUI();}}
 const VERBES=[['ouvrir','Ouvrir'],['examiner','Examiner'],['prendre','Prendre'],['utiliser','Utiliser'],['parler','Parler'],['donner','Donner']];
+function iconePoisson(){ // 24×24 : poisson mort de profil, ventre clair, écailles, œil en croix, mouches
+  const o='#1a2228',d='#4e5e6a',m='#7a8c98',l='#a8b8c2',v='#dfe8ec',w='#ffffff';
+  const rows=[[6,9,13],[7,6,17],[8,5,18],[9,4,19],[10,3,19],[11,3,19],[12,3,19],[13,3,19],[14,4,18],[15,5,17],[16,7,15]];
+  rows.forEach(([y,a,b])=>{P(a-1,y,b-a+2,1,o);});rows.forEach(([y,a,b])=>{for(let x=a;x<b;x++){const t=(y-6)/10;P(x,y,1,1,t<.25?d:t<.5?m:t<.75?l:v);}});
+  P(19,8,1,1,o);P(20,7,2,1,o);P(21,6,2,1,o);P(20,8,3,1,m);P(21,7,1,1,d);P(20,9,4,1,m);P(20,10,4,1,l);P(20,11,4,1,l);P(20,12,4,1,m);P(20,13,3,1,d);P(21,14,2,1,o);P(23,8,1,6,o);
+  P(9,5,5,1,o);P(10,4,3,1,o);P(10,5,3,1,d);P(11,4,1,1,m);P(10,16,4,1,o);P(11,17,2,1,o);P(11,16,2,1,m);
+  for(let x=7;x<17;x+=3){P(x,9,1,1,d);P(x+1,10,1,1,l);P(x+1,12,1,1,m);}
+  P(7,8,1,6,d);P(7,8,1,1,o);P(4,9,2,2,w);P(4,9,1,1,o);P(5,10,1,1,o);P(3,12,2,1,o);P(2,11,1,1,'#c86a6a');P(14,13,3,1,'#c8d4b0');
+  [[3,2],[17,2],[22,17]].forEach(([x,y])=>{P(x,y,1,1,'#111');P(x-1,y-1,1,1,'#bcd4e0');P(x+1,y-1,1,1,'#bcd4e0');});
+  P(1,4,1,1,'#8aa86a');P(2,3,1,1,'#8aa86a');P(15,0,1,1,'#8aa86a');P(16,1,1,1,'#8aa86a');}
 function icone(id){const c=document.createElement('canvas');c.width=16;c.height=16;const g=c.getContext('2d'),o=ctx;ctx=g;
-  if(id==='poisson'){P(2,6,10,4,'#9aa4ac');P(12,5,3,6,'#7a848c');P(4,7,1,1,'#222');}
+  if(id==='poisson'){c.width=c.height=24;g.imageSmoothingEnabled=false;iconePoisson();}
   else if(id==='corde'){P(3,3,10,10,'#d8c08a');P(5,5,6,6,'#b8a06a');P(7,7,2,2,'#d8c08a');}
   else if(id==='bois'){P(1,4,14,3,'#8a6a40');P(2,9,13,3,'#a07a48');P(1,4,14,1,'#a8885a');}
   ctx=o;return c;}
 function phrase(s){if(!verbe)return s?(s.sortie?'Aller vers ':'')+(s.sortie?s.nom:s.nom):'Aller';
   const v=VERBES.find(x=>x[0]===verbe)[1];if((verbe==='utiliser'||verbe==='donner')&&sel)return v+' '+ITEMS[sel].nom.toLowerCase()+(verbe==='donner'?' à ':' avec ')+(s?s.nom:'…');return v+' '+(s?s.nom:'');}
-function majUI(){if(mode!=='jeu')return;$('sentence').textContent=phrase(null);
+function majUI(){if(mode!=='jeu')return;sauver();$('sentence').textContent=phrase(null);
   document.querySelectorAll('#verbs .vb').forEach(b=>b.classList.toggle('on',b.dataset.v===verbe));
   const inv=$('inv');inv.innerHTML='';G.inv.forEach(id=>{const b=document.createElement('button');b.className='it'+(sel===id?' sel':'');b.title=ITEMS[id].nom;b.dataset.id=id;b.appendChild(icone(id));b.onclick=()=>ROUE()?invV2(id):clicObjet(id);b.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!occupe&&!cur){verbe='examiner';sel=null;clicObjet(id);}};inv.appendChild(b);});
   $('bListe').textContent='Liste '+TACHES.filter(t=>G.taches[t[0]]).length+'/'+TACHES.length;}
@@ -749,6 +759,14 @@ function demarrerJeu(){tok++;fin();cap('');mode='jeu';G={room:'plage',inv:[],f:{
   heros.x=heros.tx=300;heros.y=heros.ty=108;heros.marche=false;camX=camCible();$('screen').style.display='none';$('screen').style.background='';
   document.body.classList.add('jeu');$('fade').style.opacity=0;majUI();
   occupe=true;dit("Me voilà tout seul sur mon île. Il va falloir trouver du bois pour me chauffer… et de l’eau.").then(()=>{occupe=false;});}
+/* ---------- sauvegarde automatique (navigateur) ---------- */
+const SAVE='lk_save';
+function sauver(){if(mode!=='jeu')return;try{localStorage.setItem(SAVE,JSON.stringify({v:1,G,x:Math.round(heros.x),y:Math.round(heros.y),date:Date.now()}));}catch(_){}}
+function lireSave(){try{const d=JSON.parse(localStorage.getItem(SAVE)||'null');return d&&d.G&&ROOMS[d.G.room]?d:null;}catch(_){return null;}}
+function continuer(){const d=lireSave();if(!d)return;tok++;fin();cap('');mode='jeu';G=d.G;verbe=null;sel=null;occupe=false;
+  heros.x=heros.tx=d.x;heros.y=heros.ty=d.y;heros.marche=false;camX=camCible();$('screen').style.display='none';$('screen').style.background='';
+  document.body.classList.add('jeu');$('fade').style.opacity=0;majUI();dit("Me revoilà sur mon île.");}
+setInterval(sauver,5000);addEventListener('pagehide',sauver);
 let curItem=null;
 function majCurseur(e,h){const ce=$('cur'),b=$('scene').getBoundingClientRect();ce.style.display='block';ce.style.left=(e.clientX-b.left)+'px';ce.style.top=(e.clientY-b.top)+'px';
   ce.classList.toggle('hot',!!h);ce.classList.toggle('exit',!!(h&&h.sortie&&!verbe&&!sel));
@@ -1042,10 +1060,10 @@ function lancer(fn){initAudio();started=true;tok++;fin();document.body.classList
 function menu(){tok++;fin();finTroupe();fermerRoue();$('tuto').style.display='none';cap('');document.body.classList.remove('jeu');$('card').style.display='none';resetIntro();mode='menu';started=true;
   const s=$('screen');s.style.display='flex';s.style.background='radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.7))';
   s.innerHTML='<h1 class="logo">LOW<span>KANTA</span></h1><p class="tagline">L’AVENTURE (À PEU PRÈS) EXTRÊME</p>'+
-   '<button class="mbtn" id="mNew">Nouvelle partie</button>'+'<button class="mbtn" id="mCast">Les aventuriers</button>'+'<button class="mbtn" id="mV2">'+libV2()+'</button>'+
+   (lireSave()?'<button class="mbtn" id="mCont">Continuer</button>':'')+'<button class="mbtn" id="mNew">Nouvelle partie</button>'+'<button class="mbtn" id="mCast">Les aventuriers</button>'+'<button class="mbtn" id="mV2">'+libV2()+'</button>'+
    '<div class="pw"><label class="small" for="mPw">Mot de passe</label><input id="mPw" maxlength="12" autocomplete="off"><button id="mOk">OK</button></div><p class="msg" id="mMsg"></p>';
   $('sentence').textContent='Menu';$('fade').style.opacity=.2;
-  $('mCast').onclick=e=>{e.stopPropagation();s.style.background='';initAudio();troupe();};$('mV2').onclick=e=>{e.stopPropagation();setV2(!V2);$('mV2').textContent=libV2();};$('mNew').onclick=e=>{e.stopPropagation();s.style.background='';lancer(MDP['0']);};
+  if($('mCont'))$('mCont').onclick=e=>{e.stopPropagation();s.style.background='';lancer(continuer);};$('mCast').onclick=e=>{e.stopPropagation();s.style.background='';initAudio();troupe();};$('mV2').onclick=e=>{e.stopPropagation();setV2(!V2);$('mV2').textContent=libV2();};$('mNew').onclick=e=>{e.stopPropagation();s.style.background='';lancer(MDP['0']);};
   const ok=e=>{e&&e.stopPropagation();const v=$('mPw').value.trim().toUpperCase(),f=MDP[v];if(!f){$('mMsg').textContent='Mot de passe inconnu.';return;}s.style.background='';lancer(f);};
   $('mOk').onclick=ok;$('mPw').onkeydown=e=>{if(e.key==='Enter')ok(e);};$('mPw').onclick=e=>e.stopPropagation();}
 menu();

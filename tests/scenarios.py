@@ -279,7 +279,22 @@ def t_mobile(pw):
         c.close()
     check(not errs,'aucune erreur JS (mobile) '+str(errs)); b.close()
 
-GROUPES={'menu':t_menu,'intro':t_intro,'galerie':t_galerie,'c1':t_c1,'jeu':t_jeu,'v2':t_v2,'mobile':t_mobile,'contenu':t_contenu}
+def t_save(pw):
+    b,p=page(pw)
+    check(not p.is_visible('#mCont'),'sans sauvegarde : pas de bouton Continuer')
+    p.evaluate("()=>{localStorage.setItem('lk_tuto','1');started=true;demarrerJeu();}"); p.wait_for_timeout(200)
+    p.evaluate("()=>{fin();occupe=false;G.inv.push('poisson');G.f.corde=1;G.taches.eau=1;G.room='source';heros.x=heros.tx=150;heros.y=heros.ty=130;majUI();}")
+    ic=p.evaluate("()=>{const c=icone('poisson');const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let n=0;for(let i=3;i<d.length;i+=4)if(d[i])n++;return [c.width,n];}")
+    check(ic[0]==24 and ic[1]>150,'icône du poisson redessinée '+str(ic))
+    p.reload(); p.wait_for_timeout(400)
+    check(p.is_visible('#mCont'),'après rechargement : bouton Continuer')
+    p.click('#mCont'); p.wait_for_timeout(500)
+    st=p.evaluate("()=>[mode,G.room,G.inv.join(),!!G.f.corde,!!G.taches.eau,Math.round(heros.x)]")
+    check(st==['jeu','source','poisson',True,True,150],'Continuer reprend la partie '+str(st))
+    check(p.locator('#inv .it').count()==1,'inventaire restauré')
+    check(not p.errs,'aucune erreur JS (sauvegarde) '+str(p.errs)); b.close()
+
+GROUPES={'menu':t_menu,'intro':t_intro,'galerie':t_galerie,'c1':t_c1,'jeu':t_jeu,'v2':t_v2,'mobile':t_mobile,'save':t_save,'contenu':t_contenu}
 if __name__=='__main__':
     noms=sys.argv[1:] or list(GROUPES)
     with sync_playwright() as pw:
