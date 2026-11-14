@@ -260,7 +260,26 @@ def t_v2(pw):
     p.click('#bAide'); check(p.is_visible('#tuto'),'V2 : le bouton ? rouvre le tuto')
     check(not p.errs,'aucune erreur JS (v2) '+str(p.errs)); b.close()
 
-GROUPES={'menu':t_menu,'intro':t_intro,'galerie':t_galerie,'c1':t_c1,'jeu':t_jeu,'v2':t_v2,'contenu':t_contenu}
+def t_mobile(pw):
+    b=pw.chromium.launch(); errs=[]
+    for dev in ['iPhone 13','iPhone 13 landscape']:
+        c=b.new_context(**pw.devices[dev]); p=c.new_page(); p.on('pageerror',lambda e:errs.append(str(e)))
+        p.goto(URL); p.wait_for_timeout(300)
+        check(p.evaluate("()=>TACTILE&&document.body.classList.contains('tactile')"),dev+' : mode tactile')
+        check(p.evaluate("()=>getComputedStyle(document.body).webkitTapHighlightColor")=='rgba(0, 0, 0, 0)',dev+' : pas de flash bleu au toucher')
+        p.evaluate("()=>{started=true;demarrerJeu();}"); p.wait_for_timeout(200)
+        check(p.is_visible('#tuto') and 'Toucher' in p.inner_text('#tuto'),dev+' : tuto adapté au tactile')
+        p.evaluate("()=>{$('tuto').style.display='none';demarrerJeu1();}"); p.wait_for_timeout(300); p.evaluate("()=>{fin();occupe=false;heros.x=heros.tx=140;heros.y=heros.ty=110;camX=camCible();}")
+        check(not p.is_visible('#verbs'),dev+' : pas de barre de verbes, la roue la remplace')
+        r=p.evaluate("()=>{const g=$('game').getBoundingClientRect(),u=$('ui').getBoundingClientRect();return [g.width<=innerWidth+1,u.bottom<=innerHeight+2,document.documentElement.scrollWidth<=innerWidth+1]}")
+        check(all(r),dev+' : tout le jeu tient à l’écran '+str(r))
+        box=p.locator('#cv').bounding_box(); x=box['x']+(80-p.evaluate("()=>Math.round(camX)"))/320*box['width']; y=box['y']+104/144*box['height']
+        p.dispatch_event('#scene','pointerdown',{'pointerType':'touch','clientX':x,'clientY':y,'bubbles':True}); p.wait_for_timeout(600)
+        check(p.evaluate("()=>roueOuverte()") and p.locator('#roue button').count()==6,dev+' : appui long = roue des 6 verbes')
+        c.close()
+    check(not errs,'aucune erreur JS (mobile) '+str(errs)); b.close()
+
+GROUPES={'menu':t_menu,'intro':t_intro,'galerie':t_galerie,'c1':t_c1,'jeu':t_jeu,'v2':t_v2,'mobile':t_mobile,'contenu':t_contenu}
 if __name__=='__main__':
     noms=sys.argv[1:] or list(GROUPES)
     with sync_playwright() as pw:
