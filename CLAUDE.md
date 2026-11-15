@@ -9,3 +9,6 @@ Mêmes règles que les autres jeux (garde-fou tokens, réponses courtes, lecture
 
 ## Interface (skill `interface-jeu`)
 - Clic droit : jamais le menu du navigateur dans le jeu (écouteur `contextmenu` sur `#game`, dans `low-kanta.html`), sauf dans les champs de saisie. Testé dans le groupe du menu.
+
+## Mémoire du projet
+- `docs/CARNET.md` : histoire, personnages, chapitres, inventaires, contradictions, idées. Le lire en début de séance, le compléter à la fin (skill `carnet-de-projet`).
